@@ -1,1 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plano Cartesiano Dinámico</title>
+</head>
+<body>
 
+<h2>Plano Cartesiano con Función Dinámica</h2>
+<h2>REALIZADO POR: JOSE LUIS SANTOS SEGOVIA</h2>
+<canvas id="myCanvas" width="800" height="400" style="border:1px solid black;"></canvas>
+
+<script>
+var canvas = document.getElementById("myCanvas");
+var ctx = canvas.getContext("2d");
+
+var xstart = 0;
+var xend = 800;
+var step = 1;
+var time = 0;
+
+// 🔹 Dibujar ejes cartesianos
+function drawAxes() {
+    ctx.beginPath();
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 1;
+
+    // Eje X (horizontal)
+    ctx.moveTo(0, canvas.height / 2);
+    ctx.lineTo(canvas.width, canvas.height / 2);
+
+    // Eje Y (vertical)
+    ctx.moveTo(canvas.width / 2, 0);
+    ctx.lineTo(canvas.width / 2, canvas.height);
+
+    ctx.stroke();
+}
+
+// 🔹 Dibujar función seno
+function drawGraph() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    drawAxes(); // IMPORTANTE: dibujar ejes primero
+
+    ctx.beginPath();
+    ctx.strokeStyle = "blue";
+    ctx.lineWidth = 2;
+
+    for (var x = xstart; x < xend; x += step) {
+        var y = Math.sin((x - canvas.width/2) * 0.02 + time);
+
+        var drawY = canvas.height / 2 - y * 100;
+
+        if (x === xstart) {
+            ctx.moveTo(x, drawY);
+        } else {
+            ctx.lineTo(x, drawY);
+        }
+    }
+
+    ctx.stroke();
+}
+
+// 🔹 Animación
+function animate() {
+    drawGraph();
+    time += 0.05;
+    requestAnimationFrame(animate);
+}
+
+animate();
+</script>
+
+</body>
+</html>
