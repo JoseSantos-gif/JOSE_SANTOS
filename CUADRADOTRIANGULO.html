@@ -7,32 +7,25 @@
 </head>
 <body>
     <h2>CREAR UN CUADRADO Y UN TRIÁNGULO</h2>
+    <h1>REALIZADO: POR JOSE LUIS SANTOS SEGOVIA</h1>
     <canvas id="myCanvas" width="500" height="500" style="border:4px solid black;"></canvas>
 
     <script>
         var canvas = document.getElementById("myCanvas");
         var ctx = canvas.getContext("2d");
 
-        // CUADRADO ARRIBA (centrado)
+        // Dibujar un cuadrado
         ctx.beginPath();
-        ctx.rect(200, 50, 100, 100); // centrado horizontalmente
+        ctx.rect(50, 50, 100, 105); // x,y, ancho, alto
         ctx.fillStyle = "red";
         ctx.fill();
         ctx.stroke();
 
-        // LÍNEA EN EL CENTRO
+        // Dibujar un triangulo
         ctx.beginPath();
-        ctx.moveTo(0, 250);
-        ctx.lineTo(500, 250);
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = "black";
-        ctx.stroke();
-
-        // TRIÁNGULO ABAJO (centrado)
-        ctx.beginPath();
-        ctx.moveTo(250, 300);  // vértice superior
-        ctx.lineTo(300, 400);  // inferior derecho
-        ctx.lineTo(200, 400);  // inferior izquierdo
+        ctx.moveTo(250, 50); // Inicio en el vertice superir del triangulo
+        ctx.lineTo(300, 150); // Vertice inferiror derecho del triangulo
+        ctx.lineTo(200, 150); // Vertice inferiror izquierdo del triangulo
         ctx.closePath();
         ctx.fillStyle = "lightcoral";
         ctx.fill();
