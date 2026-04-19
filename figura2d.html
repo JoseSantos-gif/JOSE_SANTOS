@@ -1,1 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gráfico de una función</title>
+</head>
+<body>
+    <h2>Gráfico de una función</h2>
+    <canvas id="myCanvas" width="500" height="500" style="border: 1px solid black;"></canvas>
 
+    <!-- CODIGO JAVASCRIPT -->
+     <script>
+        var canvas = document.getElementById("myCanvas");
+        var ctx = canvas.getContext('2d');
+
+        // Dibujar los ejes
+        ctx.beginPath();
+        ctx.moveTo(0, 250); // eje X
+        ctx.lineTo(500, 250);
+        ctx.moveTo(250, 0); // eje Y
+        ctx.lineTo(250, 500);
+        ctx.stroke();
+
+        ctx.moveTo(0, 250);
+        ctx.lineTo(500, 250);
+        ctx.strokeStyle = 'black';
+        ctx.stroke();
+        ctx.moveTo(0, 250);
+        ctx.lineTo(500, 250);
+        ctx.strokeStyle = 'black';
+        ctx.stroke();
+
+        // Funcion a graficar: y = x ^ 2
+        ctx.beginPath();
+        ctx.moveTo(0, 250); //inicia en el eje X
+
+        for(var x = -250; x <250; x++){
+            var y = Math.pow(x, 2) / 100; //funcion para que se ajuste al canvas
+            ctx.lineTo(250 + x, 250 - y); // ajusta la posicion para contar en el canvas
+        }
+
+        ctx.strokeStyle = 'blue';  // color de la funcion
+        ctx.stroke();
+
+     </script>
+</body>
+</html>
