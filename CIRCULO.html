@@ -9,14 +9,16 @@
     <h2>Dibujo de un círculo</h2>
     <h1>REALIZADO: POR JOSE LUIS SANTOS SEGOVIA</h1>
     <!-- DEFINIR UN AREA DE DIBUJO CON EL ELEMENTO CANVAS -->
-    <canvas id="myCanvas" width="500" height="500" style="border:4px solid rgb(214, 49, 49);"></CAnvas>
+    <canvas id="myCanvas" width="500" height="500" style="border:1px solid black;"></canvas>
         
 <!-- CODIGO  JAVASCRIPT -->
     <script>
         // OBTENER EL CONTEXTO DE DIBUJO DEL CANVAS
         var canvas = document.getElementById("myCanvas");
+
         //se obtiene el contexto de dibujo en 2D
         var  ctx = canvas.getContext("2d");
+        
         // comenzar el trazado de una (circulo en este punto se inicia el dibujo)
         ctx.beginPath();
 
@@ -24,10 +26,12 @@
                 // las coordendas (x, y) ubique el centro.
          // el radio del circulo es de 100 pixeles 
 
-         ctx.arc(250, 250, 100,0, 2 * Math.PI);   
+         ctx.arc(250, 250, 100, 0, 2 * Math.PI); 
+         //(x,y) = (250,250)
+         //radio = 100  
 
         // definir el color del relleno del circulo
-        ctx.fillStyle = "green";
+        ctx.fillStyle = "lightblue";
         // rellenar el circulo con el color definido
         ctx.fill();
         
