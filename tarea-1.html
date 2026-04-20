@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 1: Gráfico de Barras Dinámico</title>
+</head>
+<body>
+    <h1>Tarea realizada por: SANTOS SEGOVIA JOSE LUIS</h1>
+    <h2>Ejercicio 1: Gráfico de Barras Dinámico</h2>
+    <canvas id="myCanvas" style="border: 4px solid; color: red;" width="500" height="500"></canvas>
+     
+    <!-- Codigo JavaScript -->
+    <script>
+        var canvas = document.getElementById("myCanvas");
+        var ctx = canvas.getContext("2d");
+
+        var datos = [10, 40, 70, 90, 100];
+        var colores = ["red", "black", "blue", "brown", "green"];
+
+         // dibujar barras
+        var x = 50; //posicion inicial en x
+        var width = 50; //ancho de cada barra
+
+        var min = 10;
+        var max = 100;
+
+        // Confirur texto
+        ctx.font = "14px Arial";
+        ctx.fillStyle = "black";
+        ctx.textAlign = "center";
+
+
+        setInterval(() => {
+
+            // Limpiar canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Generar nuevos datos
+            for (let i = 0; i < datos.length; i++) {
+                datos[i] = Math.floor(Math.random() * (max - min + 1)) + min;
+            }
+
+            // Reinicia X en cada ciclo
+            var x = 50;
+        
+            // Dibujar barras
+            for(var i = 0; i < datos.length; i++){
+                var escala = canvas.height / max;
+                var altura = datos[i] * escala;
+
+                ctx.beginPath();
+                ctx.rect(x, canvas.height - altura, width, altura); // x, y, ancho, alto
+                ctx.fillStyle = colores[i];
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillText(
+                    datos[i] + "%",
+                    x + width / 2, // centro de la barra
+                    canvas.height - altura - 5 // un poco arriba de la barra
+                );
+
+                x += width + 20; // espacio entre barros
+            }
+
+        }, 2000);
+
+
+    </script>
+
+</body>
+</html>
+
