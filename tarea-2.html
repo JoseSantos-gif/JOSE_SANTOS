@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 2: Gráfico de Puntos en Movimiento</title>
+</head>
+<body>
+    <h1>Tarea realizada por: SANTOS SEGOVIA JOSE LUIS</h1>
+    <h2>Ejercicio 2: Gráfico de Puntos en Movimiento</h2>
+
+    <canvas id="myCanvas" style="border: 4px solid red;" width="500" height="500"></canvas>
+
+    <!-- Código JavaScript -->
+    <script>
+        var canvas = document.getElementById("myCanvas");
+        var ctx = canvas.getContext("2d");
+
+        // Crear puntos (mínimo 5)
+        var puntos = [
+            {x: 50, y: 50},
+            {x: 100, y: 100},
+            {x: 150, y: 150},
+            {x: 200, y: 200},
+            {x: 250, y: 250}
+        ];
+
+        var colores = ["red", "blue", "green", "black", "orange"];
+
+        // Función para dibujar puntos
+        function dibujarPuntos() {
+            for (let i = 0; i < puntos.length; i++) {
+                ctx.beginPath();
+                ctx.arc(puntos[i].x, puntos[i].y, 8, 0, 2 * Math.PI); // círculo
+                ctx.fillStyle = colores[i];
+                ctx.fill();
+                ctx.stroke();
+            }
+        }
+
+        // Animación cada segundo
+        setInterval(() => {
+
+            // Limpiar canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Cambiar posiciones aleatoriamente
+            for (let i = 0; i < puntos.length; i++) {
+                puntos[i].x = Math.random() * canvas.width;
+                puntos[i].y = Math.random() * canvas.height;
+            }
+
+            // Dibujar nuevos puntos
+            dibujarPuntos();
+
+        }, 1000);
+
+    </script>
+
+</body>
+</html>
