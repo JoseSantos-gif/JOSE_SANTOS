@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>Propuesta 2 - Rotación tridimensional de un cubo en los ejes X y Y</title>
+
+<style>
+body {
+    margin: 0;
+    overflow: hidden;
+}
+
+#info { 
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(255,255,255,0.8);
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 20px;
+}
+
+h1{
+    font-size: 30px;
+    text-align: center;
+}
+
+h3{
+    font-size: 30px;
+    color: blue;
+}
+
+p{
+    color: red;
+    font-size: 20px;;
+}
+</style>
+
+</head>
+<body>
+
+<div id="info">
+    
+</div>
+
+<div id="info">
+    <p><b>Propuesta 2</b></p>
+    <h1>Rotación tridimensional de <br>un cubo en los ejes X y Y</h1>
+    <h3>Realizado por: Santos Segovia Jose Luis</h3>
+    <b>Animación:</b><br>
+    Rotación continua del cubo<br>
+    Ejes X y Y
+</div>
+
+<!-- Librería Three.js -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+<script>
+
+// Creamos la escena
+const scene = new THREE.Scene(); // Espacio 3D
+scene.background = new THREE.Color(0x20232a); // Color de fondo
+
+// Creamos la camara
+const camera = new THREE.PerspectiveCamera(
+    75, // campo de visión
+    window.innerWidth / window.innerHeight, // proporción
+    0.1, // cercano
+    1000 // lejano
+);
+
+// Creamos el redendizador
+const renderer = new THREE.WebGLRenderer(); // Motor gráfico
+renderer.setSize(window.innerWidth, window.innerHeight); // Tamaño
+document.body.appendChild(renderer.domElement); // Insertar en HTML
+
+// Creamos el cubo
+const geometry = new THREE.BoxGeometry(1,1,1); // Forma
+const material = new THREE.MeshNormalMaterial(); // Material
+const cubo = new THREE.Mesh(geometry, material); // Objeto
+scene.add(cubo); // Agregar a la escena
+
+// Agregamos luz
+const light = new THREE.PointLight(0xffffff, 1); // Luz blanca
+light.position.set(5,5,5); // Posición
+scene.add(light); // Añadir
+
+// Posicionamos la camara
+camera.position.z = 5; // Alejar para ver el cubo
+
+// Creamos las variables de rotación
+let velocidadX = 0.02; // Velocidad eje X
+let velocidadY = 0.03; // Velocidad eje Y
+
+// Creamos la funcion de animación
+function animate() {
+
+    requestAnimationFrame(animate); // Loop infinito
+
+    // Nos permite la rotacion en el eje X
+    cubo.rotation.x += velocidadX; // Giro sobre eje X
+
+    // Nos permite la rotacion en el eje Y
+    cubo.rotation.y += velocidadY; // Giro sobre eje Y
+
+    // Renderizador
+    renderer.render(scene, camera);
+}
+
+// Ejecutar animación
+animate();
+
+// Ajustes responsivos
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight; // Nueva proporción
+    camera.updateProjectionMatrix(); // Actualizar
+    renderer.setSize(window.innerWidth, window.innerHeight); // Ajustar pantalla
+});
+
+</script>
+
+</body>
+</html>
