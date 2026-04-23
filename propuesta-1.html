@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>Propuesta 1 -Desplazamiento lineal de un cubo en el espacio tridimensional</title>
+
+<style>
+body {
+    margin: 0;
+    overflow: hidden;
+}
+
+#info { 
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(255,255,255,0.8);
+    padding: 20px;
+    border-radius: 8px;
+    font-size: 20px;
+}
+
+h1{
+    font-size: 30px;
+    text-align: center;
+}
+
+h3{
+    font-size: 30px;
+    color: blue;
+}
+
+p{
+    color: red;
+    font-size: 20px;;
+}
+</style>
+
+</head>
+<body>
+
+<div id="info">
+    <p><b>Propuesta 1</b></p>
+    <h1>Desplazamiento lineal de un <br> cubo en el espacio tridimensional</h1>
+    <h3>Realizado por: Santos Segovia Jose Luis</h3>
+    <b>Animación:</b><br>
+    El cubo se mueve automáticamente en el eje X<br>
+    (Traslación)
+</div>
+
+<!-- Importamos la librería three.js -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+<script>
+
+// Creamos la escena
+const scene = new THREE.Scene(); // Creamos el espacio 3D
+scene.background = new THREE.Color(0x20232a); // Color de fondo oscuro
+
+// Creamos la camara
+const camera = new THREE.PerspectiveCamera(
+    75, // campo de visión
+    window.innerWidth / window.innerHeight, // proporción pantalla
+    0.1, // distancia mínima
+    1000 // distancia máxima
+);
+
+// Creamos el redendizador
+const renderer = new THREE.WebGLRenderer(); // Motor gráfico
+renderer.setSize(window.innerWidth, window.innerHeight); // Tamaño pantalla
+document.body.appendChild(renderer.domElement); // Agregar al HTML
+
+// Creamos el cubo
+const geometry = new THREE.BoxGeometry(1,1,1); // Geometría del cubo
+const material = new THREE.MeshNormalMaterial(); // Material con colores automáticos
+const cubo = new THREE.Mesh(geometry, material); // Crear objeto
+scene.add(cubo); // Añadir a la escena
+
+// Agregamos luz
+const light = new THREE.PointLight(0xffffff, 1); // Luz blanca
+light.position.set(5,5,5); // Posición de la luz
+scene.add(light); // Añadir a la escena
+
+// Posicionamos la camara
+camera.position.z = 5; // Alejar la cámara para ver el cubo
+
+// Creamos las variables de traslacion
+let velocidad = 0.05; // Velocidad de movimiento
+let limite = 3; // Límite de desplazamiento en X
+
+// Creamos una funcion para la animacion
+function animate() {
+
+    requestAnimationFrame(animate); // Llama continuamente la función (loop)
+
+    // Realizamos traslacion en 3D
+    cubo.position.x += velocidad; // Mover el cubo en eje X
+
+    // Nos permite el cambio de direccion
+    if (cubo.position.x > limite || cubo.position.x < -limite) {
+        velocidad *= -1; // Invierte dirección
+    }
+
+    // Nos permite redenrizar la escena
+    renderer.render(scene, camera);
+}
+
+// Ejecutar animación
+animate();
+
+// ajuste responsivo
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight; // Actualizar proporción
+    camera.updateProjectionMatrix(); // Recalcular cámara
+    renderer.setSize(window.innerWidth, window.innerHeight); // Ajustar tamaño
+});
+
+</script>
+
+</body>
+</html>
