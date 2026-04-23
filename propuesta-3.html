@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>Propuesta 3 - Aplicación integrada de traslación, rotación y escalado en un objeto tridimensional</title>
+
+<style>
+body {
+    margin: 0;
+    overflow: hidden;
+    font-family: Arial;
+}
+
+#info {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(255,255,255,0.85);
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 17px;
+    font-family: 'Times New Roman', Times, serif;
+}
+
+h1{
+    font-size: 30px;
+    text-align: center;
+}
+
+h3{
+    font-size: 30px;
+    color: blue;
+}
+
+p{
+    color: red;
+    font-size: 20px;;
+} 
+</style>
+
+</head>
+<body>
+
+<div id="info">
+    <p><b>Propuesta 3</b></p>
+    <h1>Aplicación integrada de traslación, rotación <br>y escalado en un objeto tridimensional</h1>
+    <h3>Realizado por: Santos Segovia Jose Luis</h3>
+    <b>CONTROLES</b><br><br>
+    🔹 Flechas → Traslación (Posición)<br>
+    🔹 Q / E → Rotación<br>
+    🔹 Z / X → Escalado (tamaño)
+</div>
+
+<!-- Librería Three.js -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+<script>
+
+// Creamos la escena
+const scene = new THREE.Scene(); // Espacio 3D
+scene.background = new THREE.Color(0x20232a); // Color de fondo
+
+// Creamos la camara
+const camera = new THREE.PerspectiveCamera(
+    75, // campo de visión
+    window.innerWidth / window.innerHeight, // proporción
+    0.1, // cercano
+    1000 // lejano
+);
+
+// Creamos el renderizador
+const renderer = new THREE.WebGLRenderer(); // Motor gráfico
+renderer.setSize(window.innerWidth, window.innerHeight); // Tamaño
+document.body.appendChild(renderer.domElement); // Insertar en HTML
+
+// Creamos el cubo
+const geometry = new THREE.BoxGeometry(1,1,1); // Geometría
+const material = new THREE.MeshNormalMaterial(); // Material
+const cubo = new THREE.Mesh(geometry, material); // Objeto 3D
+scene.add(cubo); // Agregar a la escena
+
+// Agregamos la luz
+const light = new THREE.PointLight(0xffffff, 1); // Luz blanca
+light.position.set(5,5,5); // Posición de la luz
+scene.add(light); // Añadir a la escena
+
+// Posicionamos la camara   
+camera.position.z = 5; // Alejar cámara
+
+// Establecemos los controles por teclado
+window.addEventListener('keydown', (event) => {
+
+    switch(event.key) {
+
+        // Controles para la traslación (posicion)
+        case 'ArrowUp':
+            cubo.position.y += 0.2; // mover arriba
+            break;
+
+        case 'ArrowDown':
+            cubo.position.y -= 0.2; // mover abajo
+            break;
+
+        case 'ArrowLeft':
+            cubo.position.x -= 0.2; // mover izquierda
+            break;
+
+        case 'ArrowRight':
+            cubo.position.x += 0.2; // mover derecha
+            break;
+
+        // Controles para la rotacion (orientacion)
+        case 'q':
+        case 'Q':
+            cubo.rotation.y -= 0.1; // rotar izquierda
+            break;
+
+        case 'e':
+        case 'E':
+            cubo.rotation.y += 0.1; // rotar derecha
+            break;
+
+        // Controles para el escalado (tamaño)
+        case 'z':
+        case 'Z':
+            cubo.scale.x += 0.1; // aumentar tamaño X
+            cubo.scale.y += 0.1; // aumentar tamaño Y
+            cubo.scale.z += 0.1; // aumentar tamaño Z
+            break;
+
+        case 'x':
+        case 'X':
+            // Reducir tamaño pero con límite mínimo
+            cubo.scale.x = Math.max(0.2, cubo.scale.x - 0.1);
+            cubo.scale.y = Math.max(0.2, cubo.scale.y - 0.1);
+            cubo.scale.z = Math.max(0.2, cubo.scale.z - 0.1);
+            break;
+    }
+
+});
+
+// Creamos la funcion para la animacion
+function animate() {
+
+    requestAnimationFrame(animate); // Loop infinito
+
+    renderer.render(scene, camera); // Dibujar escena
+
+}
+
+// Ejecutar animación
+animate();
+
+// Ajustes responsive
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight; // nueva proporción
+    camera.updateProjectionMatrix(); // actualizar cámara
+    renderer.setSize(window.innerWidth, window.innerHeight); // ajustar tamaño
+});
+
+</script>
+
+</body>
+</html>
