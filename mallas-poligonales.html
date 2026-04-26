@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Malla Poligonal + Documentación</title>
+
+<style>
+body {
+    margin: 0;
+    display: flex;
+    height: 100vh;
+    background: black;
+    color: white;
+    font-family: Arial;
+}
+
+/* IZQUIERDA */
+#contenedorCanvas {
+    width: 50%;
+}
+
+/* DERECHA */
+#documentacion {
+    width: 50%;
+    padding: 20px;
+    background: #0f0f0f;
+    overflow-y: auto;
+}
+
+/* TARJETAS */
+.card {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 0 10px rgba(0,255,255,0.2);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: scale(1.03);
+}
+
+.card h3 {
+    margin-top: 0;
+    color: cyan;
+}
+
+canvas {
+    display: block;
+}
+</style>
+</head>
+<body>
+
+<div id="contenedorCanvas">
+    <canvas id="canvas"></canvas>
+</div>
+
+<div id="documentacion">
+    <h1 style="color: cyan;">🏀 Realizado por: Jose Luis Santos Segovia</h1>
+    <h2>📘 Mallas Poligonales</h2>
+
+    <div class="card">
+        <h3>Canvas y Contexto</h3>
+        <p><b>getContext("2d"):</b> Permite dibujar gráficos en 2D dentro del canvas.</p>
+    </div>
+
+    <div class="card">
+        <h3>Función resize()</h3>
+        <p>
+        Ajusta el tamaño del canvas al tamaño de la ventana.<br>
+        Se ejecuta con:<br>
+        <b>window.addEventListener("resize", resize)</b>
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Animación</h3>
+        <p>
+        <b>requestAnimationFrame(animar):</b><br>
+        Permite ejecutar la animación de forma fluida y continua.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Centrado de la Malla</h3>
+        <p>
+        ancho = columnas × tamaño<br>
+        alto = filas × tamaño<br><br>
+        Se centra usando:<br>
+        (canvas - tamañoMalla) / 2
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Dibujado de Polígonos</h3>
+        <p>
+        <b>beginPath()</b> → inicia figura<br>
+        <b>moveTo()</b> → punto inicial<br>
+        <b>lineTo()</b> → dibuja líneas<br>
+        <b>closePath()</b> → cierra figura<br>
+        <b>stroke()</b> → dibuja contorno
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Movimiento Ondulado</h3>
+        <p>
+        <b>Math.sin()</b> genera el efecto de onda.<br>
+        Se combina con el tiempo para animación continua.
+        </p>
+    </div>
+
+</div>
+
+<script>
+// Obtiene el elemento canvas del HTML
+const canvas = document.getElementById("canvas");
+
+// Obtiene el contexto 2D donde se dibujará
+const ctx = canvas.getContext("2d");
+
+// Función para ajustar el tamaño del canvas
+function resize() {
+    // Ancho: la mitad de la pantalla
+    canvas.width = window.innerWidth / 2;
+
+    // Alto: toda la altura de la ventana
+    canvas.height = window.innerHeight;
+}
+
+// Evento que detecta cuando se cambia el tamaño de la ventana
+window.addEventListener("resize", resize);
+
+// Llama la función al inicio
+resize();
+
+// Número de filas de la malla
+let filas = 20;
+
+// Número de columnas de la malla
+let columnas = 20;
+
+// Tamaño de cada celda (cuadrado)
+let tamaño = 30;
+
+// Variable de tiempo para animación
+let tiempo = 0;
+
+// Función principal de animación
+function animar() {
+
+    // Limpia el canvas en cada frame
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Calcula el ancho total de la malla
+    let anchoMalla = columnas * tamaño;
+
+    // Calcula el alto total de la malla
+    let altoMalla = filas * tamaño;
+
+    // Calcula la posición inicial en X para centrar la malla
+    let inicioX = (canvas.width - anchoMalla) / 2;
+
+    // Calcula la posición inicial en Y para centrar la malla
+    let inicioY = (canvas.height - altoMalla) / 2;
+
+    // Recorre las filas
+    for (let i = 0; i < filas; i++) {
+
+        // Recorre las columnas
+        for (let j = 0; j < columnas; j++) {
+
+            // Posición X de cada celda
+            let x = inicioX + j * tamaño;
+
+            // Posición Y de cada celda
+            let y = inicioY + i * tamaño;
+
+            // Offset vertical usando función seno (crea efecto de onda)
+            let offset = Math.sin((i + j + tiempo) * 0.3) * 10;
+
+            // ========================
+            // DIBUJAR CUADRADO
+            // ========================
+            ctx.beginPath(); // Inicia nuevo trazo
+            ctx.strokeStyle = "cyan"; // Color del borde
+
+            // Dibuja los 4 lados del cuadrado con desplazamiento (offset)
+            ctx.moveTo(x, y + offset); // Punto superior izquierdo
+            ctx.lineTo(x + tamaño, y + offset); // superior derecho
+            ctx.lineTo(x + tamaño, y + tamaño + offset); // inferior derecho
+            ctx.lineTo(x, y + tamaño + offset); // inferior izquierdo
+
+            ctx.closePath(); // Cierra la figura
+            ctx.stroke(); // Dibuja el contorno
+        }
+    }
+
+    // Incrementa el tiempo para animar la onda
+    tiempo += 0.05;
+
+    // Llama de nuevo la función para animación continua
+    requestAnimationFrame(animar);
+}
+
+// Inicia la animación
+animar();
+</script>
+
+</body>
+</html>
