@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Sistema Vectorial + Documentación</title>
+
+<style>
+body {
+    margin: 0;
+    display: flex;
+    height: 100vh;
+    background: black;
+    color: white;
+    font-family: Arial;
+}
+
+/* IZQUIERDA */
+#contenedorCanvas {
+    width: 50%;
+}
+
+/* DERECHA */
+#documentacion {
+    width: 50%;
+    padding: 20px;
+    background: #0f0f0f;
+    overflow-y: auto;
+}
+
+/* TARJETAS */
+.card {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 0 10px rgba(0,255,0,0.2);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: scale(1.03);
+}
+
+.card h3 {
+    margin-top: 0;
+    color: lime;
+}
+
+canvas {
+    display: block;
+}
+</style>
+</head>
+<body>
+
+<div id="contenedorCanvas">
+    <canvas id="canvas"></canvas>
+</div>
+
+<div id="documentacion">
+    <h1>🏀 Realizado por: Jose Luis Santos Segovia</h1>
+    <h2>📘 Sistema Vectorial</h2>
+
+    <div class="card">
+        <h3>Canvas y Contexto</h3>
+        <p>
+        <b>getContext("2d"):</b><br>
+        Permite dibujar gráficos en el canvas.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Coordenadas del Mouse</h3>
+        <p>
+        <b>mousemove:</b> detecta el movimiento del cursor.<br><br>
+        <b>clientX / clientY:</b> obtienen la posición del mouse en pantalla.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Centro del Sistema</h3>
+        <p>
+        Se define el origen del vector en el centro del canvas:<br><br>
+        <b>centroX = width / 2</b><br>
+        <b>centroY = height / 2</b>
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Definición de Vector</h3>
+        <p>
+        Un vector se representa como una línea entre dos puntos:<br><br>
+        <b>moveTo(inicio)</b><br>
+        <b>lineTo(fin)</b>
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Dibujo del Vector</h3>
+        <p>
+        <b>beginPath():</b> inicia el trazo<br>
+        <b>stroke():</b> dibuja la línea<br>
+        <b>strokeStyle:</b> color del vector<br>
+        <b>lineWidth:</b> grosor de línea
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Animación</h3>
+        <p>
+        <b>requestAnimationFrame(dibujar):</b><br>
+        Permite actualizar el vector en tiempo real según el mouse.
+        </p>
+    </div>
+
+</div>
+
+<script>
+// Obtiene el elemento canvas del HTML
+const canvas = document.getElementById("canvas");
+
+// Obtiene el contexto 2D para dibujar
+const ctx = canvas.getContext("2d");
+
+// ============================
+// FUNCIÓN PARA AJUSTAR TAMAÑO
+// ============================
+function resize() {
+    // Ancho: la mitad de la pantalla
+    canvas.width = window.innerWidth / 2;
+
+    // Alto: toda la altura de la ventana
+    canvas.height = window.innerHeight;
+}
+
+// Detecta cuando se redimensiona la ventana
+window.addEventListener("resize", resize);
+
+// Ejecuta al inicio
+resize();
+
+// ============================
+// POSICIÓN INICIAL DEL MOUSE
+// ============================
+// Se inicia en el centro del canvas
+let mouseX = canvas.width / 2;
+let mouseY = canvas.height / 2;
+
+// ============================
+// EVENTO: MOVIMIENTO DEL MOUSE
+// ============================
+canvas.addEventListener("mousemove", function(e) {
+
+    // Actualiza la coordenada X del mouse
+    mouseX = e.clientX;
+
+    // Actualiza la coordenada Y del mouse
+    mouseY = e.clientY;
+});
+
+// ============================
+// FUNCIÓN DE DIBUJO
+// ============================
+function dibujar() {
+
+    // Limpia todo el canvas en cada frame
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Calcula el centro del canvas
+    let centroX = canvas.width / 2;
+    let centroY = canvas.height / 2;
+
+    // ============================
+    // DIBUJO DEL VECTOR (LÍNEA)
+    // ============================
+    ctx.beginPath(); // Inicia un nuevo trazo
+
+    // Punto inicial: centro del canvas
+    ctx.moveTo(centroX, centroY);
+
+    // Punto final: posición actual del mouse
+    ctx.lineTo(mouseX, mouseY);
+
+    // Color de la línea
+    ctx.strokeStyle = "lime";
+
+    // Grosor de la línea
+    ctx.lineWidth = 2;
+
+    // Dibuja la línea en pantalla
+    ctx.stroke();
+
+    // Llama de nuevo para animación continua
+    requestAnimationFrame(dibujar);
+}
+
+// Inicia la animación
+dibujar();
+</script>
+
+</body>
+</html>

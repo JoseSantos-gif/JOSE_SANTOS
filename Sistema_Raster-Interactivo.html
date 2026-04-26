@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Raster Interactivo + Documentación</title>
+
+<style>
+body {
+    margin: 0;
+    display: flex;
+    height: 100vh;
+    background: black;
+    color: white;
+    font-family: Arial;
+}
+
+/* IZQUIERDA */
+#contenedorCanvas {
+    width: 50%;
+}
+
+/* DERECHA */
+#documentacion {
+    width: 50%;
+    padding: 20px;
+    background: #0f0f0f;
+    overflow-y: auto;
+}
+
+/* TARJETAS */
+.card {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 0 10px rgba(0,255,255,0.2);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: scale(1.03);
+}
+
+.card h3 {
+    margin-top: 0;
+    color: cyan;
+}
+
+canvas {
+    display: block;
+}
+</style>
+</head>
+<body>
+
+<div id="contenedorCanvas">
+    <canvas id="canvas"></canvas>
+</div>
+
+<div id="documentacion">
+    <h1>🏀 Realizado por: Jose Luis Santos Segovia</h1>
+    <h2>📘 Raster Interactivo</h2>
+
+    <div class="card">
+        <h3>Canvas y Contexto</h3>
+        <p>
+        <b>getContext("2d"):</b> Permite dibujar gráficos en el canvas.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Detección del Mouse</h3>
+        <p>
+        <b>addEventListener("mousemove"):</b><br>
+        Captura el movimiento del mouse en tiempo real.<br><br>
+        <b>e.clientX / e.clientY:</b><br>
+        Obtienen la posición del cursor en pantalla.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Variables de Posición</h3>
+        <p>
+        <b>mouseX, mouseY:</b><br>
+        Almacenan la posición actual del mouse para dibujar el círculo.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Efecto Raster (Rastro)</h3>
+        <p>
+        Se usa:<br>
+        <b>fillStyle = "rgba(0,0,0,0.1)"</b><br><br>
+        Esto crea un fondo semi-transparente que genera un efecto de
+        desvanecimiento (trail o rastro).
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Dibujo del Círculo</h3>
+        <p>
+        <b>arc(x, y, radio, 0, 2π):</b><br>
+        Dibuja un círculo en la posición del mouse.<br><br>
+        <b>fill():</b> rellena la figura.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Animación Continua</h3>
+        <p>
+        <b>requestAnimationFrame(animar):</b><br>
+        Permite actualizar la pantalla continuamente de forma fluida.
+        </p>
+    </div>
+
+</div>
+
+<script>
+// Obtiene el elemento canvas del HTML
+const canvas = document.getElementById("canvas");
+
+// Obtiene el contexto 2D para dibujar
+const ctx = canvas.getContext("2d");
+
+// Ajusta el tamaño del canvas al tamaño completo de la ventana
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+// Variables para almacenar la posición del mouse
+let mouseX = 0;
+let mouseY = 0;
+
+// ============================
+// EVENTO: MOVIMIENTO DEL MOUSE
+// ============================
+// Detecta cuando el mouse se mueve dentro del canvas
+canvas.addEventListener("mousemove", function(e) {
+
+    // Guarda la posición horizontal del mouse
+    mouseX = e.clientX;
+
+    // Guarda la posición vertical del mouse
+    mouseY = e.clientY;
+});
+
+// Función principal de animación
+function animar() {
+
+    // ============================
+    // EFECTO RASTER (DESVANECIMIENTO)
+    // ============================
+    // Dibuja un rectángulo semi-transparente negro
+    // Esto NO borra completamente, sino que crea un efecto de "rastro"
+    ctx.fillStyle = "rgba(0,0,0,0.1)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // ============================
+    // DIBUJO DEL CÍRCULO
+    // ============================
+    ctx.beginPath(); // Inicia un nuevo trazo
+
+    // Dibuja un círculo en la posición del mouse
+    ctx.arc(mouseX, mouseY, 20, 0, Math.PI * 2);
+
+    ctx.fillStyle = "cyan"; // Color del círculo
+    ctx.fill(); // Rellena el círculo
+
+    // Llama nuevamente a la función para animación continua
+    requestAnimationFrame(animar);
+}
+
+// Inicia la animación
+animar();
+</script>
+
+</body>
+</html>

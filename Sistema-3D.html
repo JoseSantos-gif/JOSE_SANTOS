@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Three.js + Documentación</title>
+
+<style>
+body {
+    margin: 0;
+    display: flex;
+    height: 100vh;
+    background: black;
+    color: white;
+    font-family: Arial;
+}
+
+/* IZQUIERDA */
+#contenedor3D {
+    width: 50%;
+}
+
+/* DERECHA */
+#documentacion {
+    width: 50%;
+    padding: 20px;
+    background: #0f0f0f;
+    overflow-y: auto;
+}
+
+/* TARJETAS */
+.card {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 0 10px rgba(0,255,0,0.2);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: scale(1.03);
+}
+
+.card h3 {
+    margin-top: 0;
+    color: #00ff88;
+}
+</style>
+</head>
+<body>
+
+<div id="contenedor3D"></div>
+
+<div id="documentacion">
+    <h1>🏀 Realizado por: Jose Luis Santos Segovia</h1>
+    <h2>📘 Escena 3D (Three.js)</h2>
+
+    <div class="card">
+        <h3>Escena (Scene)</h3>
+        <p>
+        <b>THREE.Scene():</b><br>
+        Es el contenedor principal donde se agregan todos los objetos 3D.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Cámara</h3>
+        <p>
+        <b>PerspectiveCamera():</b><br>
+        Simula la visión humana.<br><br>
+        Parámetros:<br>
+        FOV (75), aspecto, plano cercano y lejano.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Renderizador</h3>
+        <p>
+        <b>WebGLRenderer():</b><br>
+        Dibuja la escena usando la GPU.<br><br>
+        <b>setSize():</b> define el tamaño del render.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Geometría</h3>
+        <p>
+        <b>BoxGeometry():</b><br>
+        Define la forma del cubo (vértices y caras).
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Material</h3>
+        <p>
+        <b>MeshBasicMaterial():</b><br>
+        Define el color del objeto.<br><br>
+        <b>wireframe:</b> muestra solo las aristas.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Objeto 3D</h3>
+        <p>
+        <b>Mesh():</b><br>
+        Combina geometría + material para crear el cubo.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Transformaciones</h3>
+        <p>
+        <b>rotation.x / rotation.y:</b><br>
+        Permiten rotar el objeto en el espacio 3D.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Animación</h3>
+        <p>
+        <b>requestAnimationFrame():</b><br>
+        Ejecuta la animación continuamente.<br><br>
+        <b>renderer.render():</b><br>
+        Dibuja la escena desde la cámara.
+        </p>
+    </div>
+
+</div>
+
+<!-- Importa la librería Three.js desde un CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script>
+// Obtiene el contenedor donde se insertará el canvas 3D
+const contenedor = document.getElementById("contenedor3D");
+
+// ============================
+// CREACIÓN DE LA ESCENA
+// ============================
+// La escena es donde se agregan todos los objetos 3D
+const scene = new THREE.Scene();
+
+// ============================
+// CÁMARA
+// ============================
+// Cámara en perspectiva (simula cómo ve el ojo humano)
+const camera = new THREE.PerspectiveCamera(
+    75, // Campo de visión (FOV)
+    (window.innerWidth / 2) / window.innerHeight, // Relación de aspecto
+    0.1, // Plano cercano (objetos más cercanos visibles)
+    1000 // Plano lejano (objetos más lejanos visibles)
+);
+
+// ============================
+// RENDERIZADOR
+// ============================
+// Motor que dibuja la escena usando WebGL
+const renderer = new THREE.WebGLRenderer();
+
+// Define el tamaño del área de renderizado (mitad de pantalla)
+renderer.setSize(window.innerWidth / 2, window.innerHeight);
+
+// Inserta el canvas generado dentro del contenedor
+contenedor.appendChild(renderer.domElement);
+
+// ============================
+// CREACIÓN DEL CUBO
+// ============================
+
+// Geometría del cubo (forma 3D)
+const geometry = new THREE.BoxGeometry();
+
+// Material del cubo
+// color: verde
+// wireframe: true → solo muestra las aristas (malla)
+const material = new THREE.MeshBasicMaterial({
+    color: 0x00ff00,
+    wireframe: true
+});
+
+// Une la geometría y el material para crear el objeto 3D
+const cube = new THREE.Mesh(geometry, material);
+
+// Agrega el cubo a la escena
+scene.add(cube);
+
+// Posiciona la cámara alejándola en el eje Z
+// (para poder visualizar el cubo)
+camera.position.z = 5;
+
+// ============================
+// EVENTO: REDIMENSIONAR VENTANA
+// ============================
+// Ajusta el render y la cámara cuando cambia el tamaño de la ventana
+window.addEventListener("resize", () => {
+
+    // Actualiza el tamaño del render
+    renderer.setSize(window.innerWidth / 2, window.innerHeight);
+
+    // Actualiza la relación de aspecto de la cámara
+    camera.aspect = (window.innerWidth / 2) / window.innerHeight;
+
+    // Aplica los cambios a la cámara
+    camera.updateProjectionMatrix();
+});
+
+// ============================
+// FUNCIÓN DE ANIMACIÓN
+// ============================
+function animate() {
+
+    // Genera animación continua
+    requestAnimationFrame(animate);
+
+    // Rotación del cubo en el eje X
+    cube.rotation.x += 0.01;
+
+    // Rotación del cubo en el eje Y
+    cube.rotation.y += 0.01;
+
+    // Renderiza la escena desde la perspectiva de la cámara
+    renderer.render(scene, camera);
+}
+
+// Inicia la animación
+animate();
+</script>
+
+</body>
+</html>
