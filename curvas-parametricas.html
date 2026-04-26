@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Curva Paramétrica + Documentación</title>
+
+<style>
+body {
+    margin: 0;
+    display: flex;
+    height: 100vh;
+    background: black;
+    color: white;
+    font-family: Arial;
+}
+
+/* IZQUIERDA */
+#contenedorCanvas {
+    width: 50%;
+}
+
+/* DERECHA */
+#documentacion {
+    width: 50%;
+    padding: 20px;
+    background: #0f0f0f;
+    overflow-y: auto;
+}
+
+/* TARJETAS */
+.card {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 0 10px rgba(255,0,0,0.2);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: scale(1.03);
+}
+
+.card h3 {
+    margin-top: 0;
+    color: #ff4d4d;
+}
+
+canvas {
+    display: block;
+}
+</style>
+</head>
+<body>
+
+<div id="contenedorCanvas">
+    <canvas id="canvas"></canvas>
+</div>
+
+<div id="documentacion">
+    <h1 style="color: red;">🏀 Realizado por: Jose Luis Santos Segovia</h1>
+    <h2>📘 Curva Paramétrica</h2>
+
+    <div class="card">
+        <h3>Canvas y Contexto</h3>
+        <p>
+        <b>getContext("2d"):</b> Permite dibujar gráficos en 2D dentro del canvas.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Función resize()</h3>
+        <p>
+        Ajusta el canvas al tamaño de la pantalla.<br>
+        Se ejecuta con:<br>
+        <b>window.addEventListener("resize", resize)</b>
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Curva Paramétrica</h3>
+        <p>
+        Se usa una ecuación paramétrica:<br><br>
+        x = cx + r · cos(t)<br>
+        y = cy + r · sin(t)<br><br>
+        Esto genera un movimiento circular.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Centro y Radio</h3>
+        <p>
+        <b>cx, cy:</b> centro del canvas<br>
+        <b>r:</b> radio de la circunferencia
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Dibujo de la órbita</h3>
+        <p>
+        <b>arc(cx, cy, r, 0, 2π):</b><br>
+        Dibuja la circunferencia completa.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Partícula en movimiento</h3>
+        <p>
+        Se dibuja un punto rojo que sigue la curva usando:<br>
+        <b>arc(x, y, 10, 0, 2π)</b>
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Animación</h3>
+        <p>
+        <b>t += 0.02:</b> avanza el tiempo<br>
+        <b>requestAnimationFrame():</b> actualiza la animación de forma fluida
+        </p>
+    </div>
+
+</div>
+
+<script>
+// Obtiene el elemento <canvas> del HTML
+const canvas = document.getElementById("canvas");
+
+// Obtiene el contexto 2D del canvas (donde se dibuja)
+const ctx = canvas.getContext("2d");
+
+// Función para ajustar el tamaño del canvas
+function resize() {
+    // Ancho será la mitad de la pantalla
+    canvas.width = window.innerWidth / 2;
+
+    // Alto será toda la altura de la ventana
+    canvas.height = window.innerHeight;
+}
+
+// Detecta cuando se redimensiona la ventana
+window.addEventListener("resize", resize);
+
+// Llama a la función al inicio para establecer tamaño inicial
+resize();
+
+// Variable de tiempo (ángulo en radianes)
+let t = 0;
+
+// Función principal de animación
+function animar() {
+
+    // Limpia todo el canvas en cada frame (para evitar trazos acumulados)
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Coordenadas del centro del canvas
+    let cx = canvas.width / 2;
+    let cy = canvas.height / 2;
+
+    // Radio de la órbita
+    let r = 150;
+
+    // Calcula la posición X usando coseno (movimiento circular)
+    let x = cx + r * Math.cos(t);
+
+    // Calcula la posición Y usando seno (movimiento circular)
+    let y = cy + r * Math.sin(t);
+
+    // ========================
+    // DIBUJAR ÓRBITA (CÍRCULO)
+    // ========================
+    ctx.beginPath(); // Inicia un nuevo dibujo
+    ctx.strokeStyle = "white"; // Color del borde
+    ctx.arc(cx, cy, r, 0, Math.PI * 2); // Dibuja un círculo completo
+    ctx.stroke(); // Muestra el contorno
+
+    // ========================
+    // DIBUJAR PARTÍCULA
+    // ========================
+    ctx.beginPath(); // Nuevo dibujo
+    ctx.fillStyle = "red"; // Color de relleno
+    ctx.arc(x, y, 10, 0, Math.PI * 2); // Círculo pequeño (la partícula)
+    ctx.fill(); // Rellena el círculo
+
+    // Incrementa el valor del tiempo para que se mueva
+    t += 0.02;
+
+    // Llama nuevamente a la función para crear animación fluida
+    requestAnimationFrame(animar);
+}
+
+// Inicia la animación
+animar();
+</script>
+
+</body>
+</html>
