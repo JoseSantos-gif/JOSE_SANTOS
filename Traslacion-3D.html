@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Traslación 3D + Documentación</title>
+
+<style>
+body {
+    margin: 0;
+    display: flex;
+    height: 100vh;
+    background: black;
+    color: white;
+    font-family: Arial;
+}
+
+/* IZQUIERDA */
+#contenedorCanvas {
+    width: 50%;
+}
+
+/* DERECHA */
+#documentacion {
+    width: 50%;
+    padding: 20px;
+    background: #0f0f0f;
+    overflow-y: auto;
+}
+
+/* TARJETAS */
+.card {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 0 10px rgba(0,255,255,0.2);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: scale(1.03);
+}
+
+.card h3 {
+    margin-top: 0;
+    color: cyan;
+}
+
+canvas {
+    display: block;
+}
+</style>
+</head>
+<body>
+
+<div id="contenedorCanvas">
+    <canvas id="canvas"></canvas>
+</div>
+
+<div id="documentacion">
+    <h1>🏀 Realizado por: Jose Luis Santos Segovia</h1>
+    <h2>📘 Traslación 3D con Límites</h2>
+
+    <div class="card">
+        <h3>Vértices del Cubo</h3>
+        <p>
+        Definen la forma del objeto en 3D (x, y, z).<br>
+        En este caso es un cubo pequeño centrado en el origen.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Aristas</h3>
+        <p>
+        Conectan los vértices para formar el cubo.<br>
+        Se dibujan mediante líneas.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Traslación</h3>
+        <p>
+        Se aplica sumando desplazamientos:<br><br>
+        x' = x + tx<br>
+        y' = y + ty<br>
+        z' = z + tz<br><br>
+        Permite mover el objeto en el espacio.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Velocidad</h3>
+        <p>
+        <b>vx, vy, vz:</b><br>
+        Controlan la velocidad de movimiento en cada eje.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Límites (Colisión)</h3>
+        <p>
+        Se define un rango (limit).<br><br>
+        Cuando el cubo lo supera:<br>
+        <b>v *= -1</b><br><br>
+        Esto invierte la dirección (rebote).
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Rotación</h3>
+        <p>
+        Se aplica sobre los ejes X y Y usando funciones trigonométricas.<br>
+        Hace que el cubo gire mientras se mueve.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Proyección</h3>
+        <p>
+        Convierte coordenadas 3D a 2D.<br>
+        En este caso es una proyección simple (ortográfica).
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Animación</h3>
+        <p>
+        <b>requestAnimationFrame(draw):</b><br>
+        Ejecuta el render en cada frame para movimiento continuo.
+        </p>
+    </div>
+
+</div>
+
+<script>
+// Obtiene el elemento canvas del HTML
+const canvas = document.getElementById("canvas");
+
+// Obtiene el contexto 2D para dibujar
+const ctx = canvas.getContext("2d");
+
+// ============================
+// AJUSTE DE TAMAÑO DEL CANVAS
+// ============================
+function resize() {
+    // Ancho: mitad de la pantalla
+    canvas.width = window.innerWidth / 2;
+
+    // Alto: toda la ventana
+    canvas.height = window.innerHeight;
+}
+
+// Detecta cambios de tamaño de ventana
+window.addEventListener("resize", resize);
+
+// Ejecuta al inicio
+resize();
+
+// ============================
+// VARIABLES DE TRASLACIÓN
+// ============================
+// Posición del cubo en el espacio 3D
+let tx = 0, ty = 0, tz = 0;
+
+// Velocidad de movimiento en cada eje
+let vx = 0.01, vy = 0.008, vz = 0.01;
+
+// Ángulo de rotación
+let angle = 0;
+
+// Límite de movimiento (como "paredes invisibles")
+const limit = 2;
+
+// ============================
+// VÉRTICES DEL CUBO
+// ============================
+const cube = [
+    {x:-0.5, y:-0.5, z:-0.5},
+    {x: 0.5, y:-0.5, z:-0.5},
+    {x: 0.5, y: 0.5, z:-0.5},
+    {x:-0.5, y: 0.5, z:-0.5},
+    {x:-0.5, y:-0.5, z: 0.5},
+    {x: 0.5, y:-0.5, z: 0.5},
+    {x: 0.5, y: 0.5, z: 0.5},
+    {x:-0.5, y: 0.5, z: 0.5}
+];
+
+// ============================
+// ARISTAS DEL CUBO
+// ============================
+const edges = [
+    [0,1],[1,2],[2,3],[3,0], // cara frontal
+    [4,5],[5,6],[6,7],[7,4], // cara trasera
+    [0,4],[1,5],[2,6],[3,7]  // conexiones laterales
+];
+
+// ============================
+// PROYECCIÓN 3D → 2D
+// ============================
+// Convierte un punto 3D a coordenadas 2D del canvas
+function project(p) {
+    let scale = 100; // factor de escala visual
+
+    return {
+        x: p.x * scale + canvas.width / 2,  // centra en X
+        y: p.y * scale + canvas.height / 2 // centra en Y
+    };
+}
+
+// ============================
+// ROTACIÓN EN EJE Y
+// ============================
+function rotateY(p, a) {
+    return {
+        x: p.x * Math.cos(a) - p.z * Math.sin(a),
+        y: p.y,
+        z: p.x * Math.sin(a) + p.z * Math.cos(a)
+    };
+}
+
+// ============================
+// ROTACIÓN EN EJE X
+// ============================
+function rotateX(p, a) {
+    return {
+        x: p.x,
+        y: p.y * Math.cos(a) - p.z * Math.sin(a),
+        z: p.y * Math.sin(a) + p.z * Math.cos(a)
+    };
+}
+
+// ============================
+// TRASLACIÓN (MOVIMIENTO)
+// ============================
+// Mueve el cubo en el espacio 3D
+function translate(p) {
+    return {
+        x: p.x + tx,
+        y: p.y + ty,
+        z: p.z + tz
+    };
+}
+
+// ============================
+// FUNCIÓN PRINCIPAL DE DIBUJO
+// ============================
+function draw() {
+
+    // Limpia el canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // ============================
+    // TRANSFORMACIONES COMPLETAS
+    // ============================
+    // Aplica rotación + traslación + proyección a cada vértice
+    let transformed = cube.map(p => {
+
+        // Rotación en Y
+        let r = rotateY(p, angle);
+
+        // Rotación en X (más lenta)
+        r = rotateX(r, angle * 0.5);
+
+        // Traslación (movimiento en el espacio)
+        r = translate(r);
+
+        // Proyección a 2D
+        return project(r);
+    });
+
+    // Estilo de dibujo
+    ctx.strokeStyle = "cyan";
+    ctx.lineWidth = 2;
+
+    // ============================
+    // DIBUJAR ARISTAS
+    // ============================
+    edges.forEach(edge => {
+
+        // Obtiene puntos transformados
+        let p1 = transformed[edge[0]];
+        let p2 = transformed[edge[1]];
+
+        // Dibuja línea entre ellos
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+    });
+
+    // ============================
+    // ACTUALIZAR POSICIÓN
+    // ============================
+    // Movimiento del cubo
+    tx += vx;
+    ty += vy;
+    tz += vz;
+
+    // Rebote en los límites (efecto caja invisible)
+    if (tx > limit || tx < -limit) vx *= -1;
+    if (ty > limit || ty < -limit) vy *= -1;
+    if (tz > limit || tz < -limit) vz *= -1;
+
+    // ============================
+    // ACTUALIZAR ROTACIÓN
+    // ============================
+    angle += 0.02;
+
+    // Llama nuevamente para animación continua
+    requestAnimationFrame(draw);
+}
+
+// Inicia la animación
+draw();
+</script>
+
+</body>
+</html>

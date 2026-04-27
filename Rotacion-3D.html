@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Rotación 3D + Documentación</title>
+
+<style>
+body {
+    margin: 0;
+    display: flex;
+    height: 100vh;
+    background: black;
+    color: white;
+    font-family: Arial;
+}
+
+/* IZQUIERDA */
+#contenedorCanvas {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* DERECHA */
+#documentacion {
+    width: 50%;
+    padding: 20px;
+    background: #0f0f0f;
+    overflow-y: auto;
+}
+
+/* TARJETAS */
+.card {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 0 10px rgba(0,255,255,0.2);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: scale(1.03);
+}
+
+.card h3 {
+    margin-top: 0;
+    color: cyan;
+}
+
+canvas {
+    display: block;
+}
+</style>
+</head>
+<body>
+
+<div id="contenedorCanvas">
+    <canvas id="canvas" width="600" height="400"></canvas>
+</div>
+
+<div id="documentacion">
+    <h1>🏀 Realizado por: Jose Luis Santos Segovia</h1>
+    <h2>📘 Rotación 3D</h2>
+
+    <div class="card">
+        <h3>Vértices del Cubo</h3>
+        <p>
+        Representan los puntos (x, y, z) del cubo.<br>
+        Se mantienen proporcionales para evitar deformación.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Aristas</h3>
+        <p>
+        Definen qué vértices se conectan.<br>
+        Permiten dibujar la estructura del cubo.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Rotación en X</h3>
+        <p>
+        Se aplica la transformación:<br><br>
+        y' = y·cos(a) - z·sin(a)<br>
+        z' = y·sin(a) + z·cos(a)
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Rotación en Y</h3>
+        <p>
+        Se aplica la transformación:<br><br>
+        x' = x·cos(a) + z·sin(a)<br>
+        z' = -x·sin(a) + z·cos(a)
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Proyección 3D → 2D</h3>
+        <p>
+        Convierte puntos 3D en coordenadas de pantalla.<br><br>
+        <b>factor = d / (d + z)</b><br>
+        Genera efecto de perspectiva.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Dibujo del Cubo</h3>
+        <p>
+        <b>moveTo() + lineTo():</b> dibujan las aristas.<br>
+        <b>stroke():</b> muestra el contorno.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Animación</h3>
+        <p>
+        <b>angleX / angleY:</b> controlan la rotación.<br><br>
+        Se incrementan en cada frame para animación continua.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Fluidez</h3>
+        <p>
+        <b>requestAnimationFrame(draw):</b><br>
+        Ejecuta la animación de forma suave y eficiente.
+        </p>
+    </div>
+
+</div>
+
+<script>
+// Obtiene el elemento canvas del HTML
+const canvas = document.getElementById("canvas");
+
+// Obtiene el contexto 2D para dibujar
+const ctx = canvas.getContext("2d");
+
+// ============================
+// ÁNGULOS DE ROTACIÓN
+// ============================
+// Controlan la rotación del cubo en los ejes X e Y
+let angleX = 0;
+let angleY = 0;
+
+// Tamaño del cubo en pantalla
+const size = 60;
+
+// ============================
+// VÉRTICES DEL CUBO (3D)
+// ============================
+// Cada punto representa una esquina del cubo
+const vertices = [
+    [-1,-1,-1],[1,-1,-1],
+    [1,1,-1],[-1,1,-1],
+    [-1,-1,1],[1,-1,1],
+    [1,1,1],[-1,1,1]
+];
+
+// ============================
+// ARISTAS DEL CUBO
+// ============================
+// Conexiones entre vértices para formar el cubo
+const edges = [
+    [0,1],[1,2],[2,3],[3,0], // cara frontal
+    [4,5],[5,6],[6,7],[7,4], // cara trasera
+    [0,4],[1,5],[2,6],[3,7]  // conexiones laterales
+];
+
+// ============================
+// ROTACIÓN EN EJE X
+// ============================
+// Aplica una rotación alrededor del eje X
+function rotateX(p, a) {
+    return [
+        p[0], // X no cambia
+        p[1]*Math.cos(a) - p[2]*Math.sin(a), // nueva Y
+        p[1]*Math.sin(a) + p[2]*Math.cos(a)  // nueva Z
+    ];
+}
+
+// ============================
+// ROTACIÓN EN EJE Y
+// ============================
+// Aplica una rotación alrededor del eje Y
+function rotateY(p, a) {
+    return [
+        p[0]*Math.cos(a) + p[2]*Math.sin(a), // nueva X
+        p[1], // Y no cambia
+        -p[0]*Math.sin(a) + p[2]*Math.cos(a) // nueva Z
+    ];
+}
+
+// ============================
+// PROYECCIÓN 3D → 2D
+// ============================
+// Convierte un punto 3D en coordenadas 2D del canvas
+function project(p) {
+
+    // Distancia de la cámara
+    const distance = 5;
+
+    // Factor de perspectiva (más lejos = más pequeño)
+    const factor = distance / (distance + p[2]);
+
+    return [
+        p[0] * factor * size + canvas.width/2,  // X proyectado
+        p[1] * factor * size + canvas.height/2 // Y proyectado
+    ];
+}
+
+// ============================
+// FUNCIÓN PRINCIPAL DE DIBUJO
+// ============================
+function draw() {
+
+    // Limpia el canvas en cada frame
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Arreglo para almacenar los puntos proyectados
+    let projected = [];
+
+    // ============================
+    // ROTAR Y PROYECTAR VÉRTICES
+    // ============================
+    for (let v of vertices) {
+
+        // Aplica rotación en X
+        let r = rotateX(v, angleX);
+
+        // Aplica rotación en Y
+        r = rotateY(r, angleY);
+
+        // Proyecta el punto 3D a 2D
+        projected.push(project(r));
+    }
+
+    // Configuración del estilo de líneas
+    ctx.strokeStyle = "cyan";
+    ctx.lineWidth = 2;
+
+    // ============================
+    // DIBUJAR ARISTAS DEL CUBO
+    // ============================
+    for (let e of edges) {
+
+        // Obtiene los puntos proyectados
+        let p1 = projected[e[0]];
+        let p2 = projected[e[1]];
+
+        // Dibuja la línea entre ellos
+        ctx.beginPath();
+        ctx.moveTo(p1[0], p1[1]);
+        ctx.lineTo(p2[0], p2[1]);
+        ctx.stroke();
+    }
+
+    // ============================
+    // ACTUALIZAR ROTACIÓN
+    // ============================
+    // Incrementa los ángulos para animar el cubo
+    angleX += 0.01;
+    angleY += 0.01;
+
+    // Llama de nuevo para animación continua
+    requestAnimationFrame(draw);
+}
+
+// Inicia la animación
+draw();
+</script>
+
+</body>
+</html>

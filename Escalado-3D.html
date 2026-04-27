@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Escalado 3D + Documentación</title>
+
+<style>
+body {
+    margin: 0;
+    display: flex;
+    height: 100vh;
+    background: black;
+    color: white;
+    font-family: Arial;
+}
+
+/* IZQUIERDA */
+#contenedorCanvas {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* DERECHA */
+#documentacion {
+    width: 50%;
+    padding: 20px;
+    background: #0f0f0f;
+    overflow-y: auto;
+}
+
+/* TARJETAS */
+.card {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 0 10px rgba(0,255,0,0.2);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: scale(1.03);
+}
+
+.card h3 {
+    margin-top: 0;
+    color: lime;
+}
+
+canvas {
+    display: block;
+}
+</style>
+</head>
+<body>
+
+<div id="contenedorCanvas">
+    <canvas id="canvas" width="600" height="400"></canvas>
+</div>
+
+<div id="documentacion">
+    <h1>🏀 Realizado por: Jose Luis Santos Segovia</h1>
+    <h2>📘 Escalado 3D</h2>
+
+    <div class="card">
+        <h3>Vértices del Cubo</h3>
+        <p>
+        Se definen como coordenadas 3D (x, y, z).<br>
+        Representan las esquinas del cubo.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Aristas</h3>
+        <p>
+        Son pares de índices que conectan vértices.<br>
+        Permiten dibujar la estructura del cubo.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Escalado 3D</h3>
+        <p>
+        Se multiplica cada coordenada por un factor:<br><br>
+        x' = x · scale<br>
+        y' = y · scale<br>
+        z' = z · scale<br><br>
+        Esto cambia el tamaño del objeto.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Proyección 3D → 2D</h3>
+        <p>
+        Convierte coordenadas 3D a pantalla 2D.<br><br>
+        Usa perspectiva:<br>
+        <b>factor = 200 / (z + distancia)</b>
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Dibujo del Cubo</h3>
+        <p>
+        <b>moveTo() + lineTo():</b> dibujan cada arista.<br>
+        <b>stroke():</b> muestra el contorno.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Animación de Escalado</h3>
+        <p>
+        <b>scale:</b> aumenta o disminuye el tamaño.<br>
+        <b>growing:</b> controla si crece o reduce.
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Animación Continua</h3>
+        <p>
+        <b>requestAnimationFrame(draw):</b><br>
+        Actualiza el cubo en cada frame.
+        </p>
+    </div>
+
+</div>
+
+<script>
+// Obtiene el elemento canvas del HTML
+const canvas = document.getElementById("canvas");
+
+// Obtiene el contexto 2D para dibujar
+const ctx = canvas.getContext("2d");
+
+// ============================
+// VARIABLES DE ESCALADO
+// ============================
+// scale: controla el tamaño del cubo (zoom)
+let scale = 1;
+
+// growing: indica si el cubo está creciendo o disminuyendo
+let growing = true;
+
+// ============================
+// VÉRTICES DEL CUBO (3D)
+// ============================
+// Cada vértice tiene coordenadas (x, y, z)
+const vertices = [
+    [-1, -1, -1], [1, -1, -1],
+    [1, 1, -1],  [-1, 1, -1],
+    [-1, -1, 1], [1, -1, 1],
+    [1, 1, 1],   [-1, 1, 1]
+];
+
+// ============================
+// ARISTAS DEL CUBO
+// ============================
+// Cada par representa una conexión entre vértices
+const edges = [
+    [0,1],[1,2],[2,3],[3,0], // cara frontal
+    [4,5],[5,6],[6,7],[7,4], // cara trasera
+    [0,4],[1,5],[2,6],[3,7]  // conexiones entre caras
+];
+
+// ============================
+// FUNCIÓN DE PROYECCIÓN 3D → 2D
+// ============================
+// Convierte coordenadas 3D en coordenadas 2D para el canvas
+function project(x, y, z) {
+
+    // Distancia de la "cámara"
+    const distance = 4;
+
+    // Factor de escala en perspectiva
+    const factor = 200 / (z + distance);
+
+    // Retorna coordenadas proyectadas en el canvas
+    return [
+        x * factor + canvas.width / 2,  // eje X centrado
+        y * factor + canvas.height / 2  // eje Y centrado
+    ];
+}
+
+// ============================
+// FUNCIÓN PRINCIPAL DE DIBUJO
+// ============================
+function draw() {
+
+    // Limpia el canvas en cada frame
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Arreglo para guardar los puntos proyectados
+    let projected = [];
+
+    // ============================
+    // PROYECTAR VÉRTICES
+    // ============================
+    for (let v of vertices) {
+
+        // Aplica escala a cada coordenada
+        let x = v[0] * scale;
+        let y = v[1] * scale;
+        let z = v[2] * scale;
+
+        // Convierte a 2D y guarda el resultado
+        projected.push(project(x, y, z));
+    }
+
+    // Configuración del dibujo de líneas
+    ctx.strokeStyle = "lime";
+    ctx.lineWidth = 2;
+
+    // ============================
+    // DIBUJAR ARISTAS DEL CUBO
+    // ============================
+    for (let e of edges) {
+
+        // Obtiene los puntos proyectados de cada extremo
+        let p1 = projected[e[0]];
+        let p2 = projected[e[1]];
+
+        // Dibuja la línea entre esos puntos
+        ctx.beginPath();
+        ctx.moveTo(p1[0], p1[1]);
+        ctx.lineTo(p2[0], p2[1]);
+        ctx.stroke();
+    }
+
+    // ============================
+    // ANIMACIÓN DE ESCALADO
+    // ============================
+    // Aumenta o disminuye el tamaño del cubo
+    if (growing) scale += 0.01;
+    else scale -= 0.01;
+
+    // Cambia de dirección al llegar al límite máximo
+    if (scale > 1.8) growing = false;
+
+    // Cambia de dirección al llegar al límite mínimo
+    if (scale < 0.6) growing = true;
+
+    // Llama nuevamente para animación continua
+    requestAnimationFrame(draw);
+}
+
+// Inicia la animación
+draw();
+</script>
+
+</body>
+</html>
