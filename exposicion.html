@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Malla Poligonal 3D + Documentación</title>
+
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            background: black;
+            color: white;
+            font-family: Arial;
+            overflow: hidden;
+        }
+
+        /* IZQUIERDA */
+        #contenedor3D {
+            width: 50%;
+        }
+
+        /* DERECHA */
+        #documentacion {
+            width: 50%;
+            padding: 20px;
+            background: #0f0f0f;
+            overflow-y: auto;
+        }
+
+        /* TARJETAS */
+        .card {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: scale(1.03);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: cyan;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- CONTENEDOR DEL MODELO 3D -->
+    <div id="contenedor3D"></div>
+
+    <!-- DOCUMENTACIÓN -->
+    <div id="documentacion">
+
+        <h1 style="color: cyan;">🏀 Realizado por el Grupo 1</h1>
+
+        <h2>📘 Mallas Poligonales 3D con Three.js</h2>
+
+        <div class="card">
+            <h3>Escena (Scene)</h3>
+            <p>
+                <b>THREE.Scene()</b> crea el espacio tridimensional donde se
+                colocan los objetos, luces y cámaras.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Cámara Perspectiva</h3>
+            <p>
+                <b>THREE.PerspectiveCamera()</b> permite visualizar la escena
+                en 3D simulando la visión humana.<br><br>
+
+                Parámetros utilizados:<br>
+                • 75 → campo de visión<br>
+                • aspect → proporción pantalla<br>
+                • 0.1 → distancia mínima<br>
+                • 1000 → distancia máxima
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Renderizador WebGL</h3>
+            <p>
+                <b>THREE.WebGLRenderer()</b> dibuja gráficos 3D usando la GPU
+                del navegador mediante WebGL.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Geometría Esférica</h3>
+            <p>
+                <b>THREE.SphereGeometry()</b> crea una esfera formada por
+                polígonos.<br><br>
+
+                Parámetros:<br>
+                • Radio = 1.5<br>
+                • Segmentos horizontales = 16<br>
+                • Segmentos verticales = 16
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Material Wireframe</h3>
+            <p>
+                <b>wireframe: true</b> permite visualizar únicamente
+                las líneas de la malla poligonal.<br><br>
+
+                Esto muestra claramente los polígonos que forman la esfera.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Malla 3D (Mesh)</h3>
+            <p>
+                <b>THREE.Mesh()</b> combina la geometría y el material
+                para crear el objeto 3D visible.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Animación</h3>
+            <p>
+                <b>requestAnimationFrame(animate)</b> ejecuta la animación
+                continuamente.<br><br>
+
+                La esfera rota usando:<br>
+                • rotation.x<br>
+                • rotation.y
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Responsive</h3>
+            <p>
+                El evento <b>resize</b> ajusta automáticamente la cámara
+                y el renderizador cuando cambia el tamaño de la ventana.
+            </p>
+        </div>
+
+    </div>
+
+    <!-- LIBRERÍA THREE.JS -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+    <script>
+
+        // =========================
+        // ESCENA
+        // =========================
+
+        // Crea la escena 3D
+        const scene = new THREE.Scene();
+
+        // Color de fondo oscuro
+        scene.background = new THREE.Color(0x111111);
+
+        // =========================
+        // CÁMARA
+        // =========================
+
+        // Cámara con perspectiva
+        const camera = new THREE.PerspectiveCamera(
+
+            75, // Campo de visión
+
+            // Relación ancho/alto
+            (window.innerWidth / 2) / window.innerHeight,
+
+            0.1, // Distancia mínima visible
+
+            1000 // Distancia máxima visible
+        );
+
+        // Aleja la cámara
+        camera.position.z = 4;
+
+        // =========================
+        // RENDERIZADOR
+        // =========================
+
+        // Crea renderizador WebGL
+        const renderer = new THREE.WebGLRenderer();
+
+        // Tamaño del renderizador
+        renderer.setSize(window.innerWidth / 2, window.innerHeight);
+
+        // Inserta el canvas generado
+        document.getElementById("contenedor3D")
+            .appendChild(renderer.domElement);
+
+        // =========================
+        // GEOMETRÍA
+        // =========================
+
+        // Crea esfera poligonal
+        const geometry = new THREE.SphereGeometry(
+
+            1.5, // Radio
+
+            16, // Segmentos horizontales
+
+            16  // Segmentos verticales
+        );
+
+        // =========================
+        // MATERIAL
+        // =========================
+
+        // Material en modo malla
+        const material = new THREE.MeshBasicMaterial({
+
+            color: 0x00ffcc,
+
+            // Muestra solo líneas
+            wireframe: true
+        });
+
+        // =========================
+        // CREACIÓN DE MALLA
+        // =========================
+
+        // Une geometría + material
+        const sphere = new THREE.Mesh(
+            geometry,
+            material
+        );
+
+        // Agrega la esfera a la escena
+        scene.add(sphere);
+
+        // =========================
+        // ANIMACIÓN
+        // =========================
+
+        function animate() {
+
+            // Llamada continua
+            requestAnimationFrame(animate);
+
+            // Rotación eje X
+            sphere.rotation.x += 0.01;
+
+            // Rotación eje Y
+            sphere.rotation.y += 0.01;
+
+            // Renderiza la escena
+            renderer.render(scene, camera);
+        }
+
+        // Inicia animación
+        animate();
+
+        // =========================
+        // RESPONSIVE
+        // =========================
+
+        window.addEventListener("resize", () => {
+
+            // Actualiza proporción
+            camera.aspect =
+                (window.innerWidth / 2) / window.innerHeight;
+
+            // Actualiza matriz de cámara
+            camera.updateProjectionMatrix();
+
+            // Ajusta tamaño renderizador
+            renderer.setSize(
+                window.innerWidth / 2,
+                window.innerHeight
+            );
+
+        });
+
+    </script>
+
+</body>
+
+</html>
