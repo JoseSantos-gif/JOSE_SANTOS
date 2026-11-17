@@ -1,0 +1,736 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acceso | Inventario</title>
+<style>
+:root{
+  --hormigon:#E6E9EC; --papel:#FFFFFF; --tinta:#16202B; --tinta-suave:#4A5866;
+  --acero:#2F4B66; --acero-osc:#223A50; --montacargas:#F5B700;
+  --linea:#C5CCD3; --borde-campo:#6B7783; --ok:#1E7B4A; --alerta:#B3261E;
+  --f-titulo:Bahnschrift,"DIN Alternate","Arial Narrow","Segoe UI",system-ui,sans-serif;
+  --f-texto:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--hormigon);color:var(--tinta);font:16px/1.5 var(--f-texto)}
+h1,h2,h3{font-family:var(--f-titulo);font-weight:600;line-height:1.15;margin:0}
+p{margin:0}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* Foco visible en todo lo interactivo */
+button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{
+  outline:2px solid var(--tinta);outline-offset:2px;box-shadow:0 0 0 5px var(--montacargas)}
+
+/* Botones */
+.btn{height:44px;padding:0 18px;border-radius:4px;border:1.5px solid var(--acero);font:600 1rem var(--f-texto);cursor:pointer;background:var(--papel);color:var(--acero)}
+.btn.primario{background:var(--acero);color:#fff;width:100%}
+.btn.primario:hover{background:var(--acero-osc)}
+.btn.borde:hover{background:#EEF1F4}
+.btn.chico{height:36px;padding:0 12px;font-size:.9rem}
+.btn.claro{background:transparent;color:#fff;border-color:#fff;height:36px;padding:0 14px;font-size:.9rem}
+.btn.claro:hover{background:rgba(255,255,255,.12)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.link{background:none;border:0;color:var(--acero);text-decoration:underline;cursor:pointer;font:inherit;padding:4px}
+
+/* Campos */
+.campo{margin-bottom:18px}
+.campo label{display:block;font-weight:600;margin-bottom:6px}
+.campo input,.campo select{width:100%;height:44px;border:1.5px solid var(--borde-campo);border-radius:4px;padding:0 12px;font:inherit;background:#fff;color:var(--tinta)}
+.campo input[aria-invalid="true"]{border-color:var(--alerta)}
+.ayuda{color:var(--tinta-suave);font-size:.9rem;margin-top:6px}
+.error{color:var(--alerta);font-size:.92rem;margin-top:6px;font-weight:600}
+.error:empty{display:none}
+.clave-wrap{position:relative}
+.clave-wrap input{padding-right:92px}
+.ver{position:absolute;right:4px;top:4px;height:36px;border:0;background:transparent;color:var(--acero);font:600 .9rem var(--f-texto);cursor:pointer;padding:0 10px;border-radius:3px}
+
+/* Pantalla de acceso */
+.login{min-height:100vh;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,440px);gap:64px;align-items:center;max-width:1040px;margin:0 auto;padding:40px 24px}
+.marca{font-family:var(--f-titulo);font-weight:700;font-size:1.15rem;display:flex;align-items:center;gap:10px;margin-bottom:28px}
+.marca::before{content:"";width:14px;height:14px;background:var(--montacargas);border:2px solid var(--tinta)}
+.login-intro h1{font-size:clamp(2.2rem,5vw,3.4rem);margin-bottom:16px;max-width:12em}
+.login-intro p{max-width:36em;color:var(--tinta-suave)}
+.login-intro .nota{margin-top:24px;padding-left:12px;border-left:4px solid var(--montacargas);color:var(--tinta)}
+.etiqueta{background:var(--papel);border:2px solid var(--tinta);border-radius:4px;overflow:hidden}
+.etiqueta-cab{background:var(--montacargas);padding:14px 24px;border-bottom:2px solid var(--tinta)}
+.etiqueta-cab h2{font-size:1.4rem}
+.etiqueta form{padding:24px 24px 8px}
+.demo{margin:8px 24px 20px;border:1px solid var(--linea);border-radius:4px}
+.demo summary{padding:10px 12px;cursor:pointer;font-weight:600}
+.demo-cuerpo{padding:0 12px 12px}
+.mini{border-collapse:collapse;width:100%}
+.mini td{padding:6px 8px;font-size:.9rem;border:0}
+.mini code{font-family:Consolas,"Courier New",monospace;background:#EEF1F4;padding:1px 6px;border-radius:3px}
+
+/* Panel */
+.barra{background:var(--tinta);color:#fff;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:8px 24px;min-height:56px;flex-wrap:wrap}
+.barra .marca{margin:0;color:#fff}
+.barra-der{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.quien{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.rol{font-size:.85rem;font-weight:600;padding:2px 10px;border-radius:999px;background:var(--montacargas);color:var(--tinta)}
+.rol-almacenero{background:#D9E2EA}
+.cuerpo{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:calc(100vh - 56px)}
+.lateral{background:var(--papel);border-right:1px solid var(--linea);padding:16px 12px}
+.lateral a,.lateral .pronto{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;border-radius:4px;text-decoration:none;color:var(--tinta);min-height:44px}
+.lateral a:hover{background:#F2F4F6}
+.lateral a[aria-current="page"]{background:#EEF1F4;box-shadow:inset 4px 0 0 var(--montacargas);font-weight:600}
+.lateral .grupo{color:var(--tinta-suave);font-size:.9rem;margin:18px 12px 6px}
+.pronto{color:var(--tinta-suave)}
+.tag{font-size:.8rem;border:1px solid var(--linea);padding:1px 8px;border-radius:999px;white-space:nowrap;color:var(--tinta-suave)}
+#contenido{padding:32px;max-width:1060px;width:100%}
+#contenido h1{font-size:2rem}
+#contenido h1:focus{outline:none}
+.sub{color:var(--tinta-suave);margin:8px 0 24px;max-width:62ch}
+.barra-acc{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px;flex-wrap:wrap}
+.barra-acc .btn{width:auto}
+.resumen{color:var(--tinta-suave)}
+
+/* Tablas */
+.tabla-wrap{overflow-x:auto;background:var(--papel);border:1px solid var(--linea);border-radius:6px}
+table{border-collapse:collapse;width:100%}
+th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--linea);vertical-align:middle}
+th{font-weight:600;font-size:.9rem;color:var(--tinta-suave);background:#F4F6F8;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+th.mia{background:#FFEDAA;color:var(--tinta)}
+td.mia{background:#FFF6D6}
+.si{font-weight:600}
+.no{color:var(--tinta-suave)}
+.estado::before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px;background:currentColor}
+.estado.on{color:var(--ok);font-weight:600}
+.estado.off{color:var(--tinta-suave)}
+.rol-sel{height:36px;border:1.5px solid var(--borde-campo);border-radius:4px;padding:0 8px;font:inherit;background:#fff;color:var(--tinta)}
+.rol-sel:disabled{background:#EEF1F4}
+.acc{display:flex;gap:8px;flex-wrap:wrap}
+.tu{color:var(--tinta-suave);font-weight:400}
+.sesion{margin-top:24px;display:grid;grid-template-columns:max-content 1fr;gap:6px 24px}
+.sesion dt{color:var(--tinta-suave)}
+.sesion dd{margin:0}
+.vacio{background:var(--papel);border:2px solid var(--tinta);border-radius:4px;padding:28px;max-width:560px}
+.vacio h1{font-size:1.6rem;margin-bottom:8px}
+.vacio .btn{margin-top:20px;width:auto}
+
+/* Diálogos */
+dialog{border:2px solid var(--tinta);border-radius:4px;padding:0;width:min(440px,calc(100vw - 32px));color:var(--tinta)}
+dialog::backdrop{background:rgba(22,32,43,.55)}
+.dlg-cab{background:var(--montacargas);padding:14px 20px;border-bottom:2px solid var(--tinta)}
+.dlg-cab h2{font-size:1.25rem}
+.dlg-cuerpo{padding:20px}
+.dlg-pie{display:flex;gap:12px;justify-content:flex-end;margin-top:8px}
+.dlg-pie .btn{width:auto}
+
+/* Aviso */
+.toast{position:fixed;left:24px;bottom:24px;background:var(--tinta);color:#fff;padding:12px 16px;border-radius:4px;max-width:min(420px,calc(100vw - 48px));opacity:0;pointer-events:none;z-index:10}
+.toast.visible{opacity:1}
+.toast.err{background:var(--alerta)}
+@media (prefers-reduced-motion:no-preference){.toast{transition:opacity .15s}}
+
+@media (max-width:820px){
+  .login{grid-template-columns:1fr;gap:32px;align-content:start}
+}
+@media (max-width:760px){
+  .cuerpo{grid-template-columns:1fr}
+  .lateral{border-right:0;border-bottom:1px solid var(--linea)}
+  #contenido{padding:20px 16px}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<noscript>Este prototipo necesita JavaScript activado en el navegador.</noscript>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------- Constantes ---------- */
+const LS_USUARIOS = 'inv_usuarios_v1';
+const LS_BLOQUEOS = 'inv_bloqueos_v1';
+const SS_SESION   = 'inv_sesion_v1';
+const MAX_FALLOS  = 3;
+const BLOQUEO_MS  = 30000;
+const ROLES = { admin: 'Administrador', almacenero: 'Almacenero' };
+const RE_USUARIO = /^[a-z0-9._]{3,20}$/i;
+
+const FUNCIONES = [
+  { f: 'Iniciar sesión',                       a: true, m: true,  s: 'Sprint 1' },
+  { f: 'Crear usuarios y asignar roles',       a: true, m: false, s: 'Sprint 1' },
+  { f: 'Registrar, editar y buscar productos', a: true, m: true,  s: 'Sprint 2' },
+  { f: 'Gestionar categorías',                 a: true, m: false, s: 'Sprint 2' },
+  { f: 'Registrar entradas y salidas',         a: true, m: true,  s: 'Sprint 3' },
+  { f: 'Ver el historial de movimientos',      a: true, m: false, s: 'Sprint 3' },
+  { f: 'Recibir alertas de stock mínimo',      a: true, m: false, s: 'Sprint 3' },
+  { f: 'Ver y exportar reportes',              a: true, m: false, s: 'Sprint 4' }
+];
+
+/* ---------- Utilidades ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+const fmt = iso => iso ? new Date(iso).toLocaleString('es-PE', { dateStyle: 'medium', timeStyle: 'short' }) : 'Nunca';
+
+const mem = {};
+const lsGet = k => { try { return localStorage.getItem(k); } catch { return mem['l' + k] ?? null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch { mem['l' + k] = v; } };
+const ssGet = k => { try { return sessionStorage.getItem(k); } catch { return mem['s' + k] ?? null; } };
+const ssSet = (k, v) => { try { sessionStorage.setItem(k, v); } catch { mem['s' + k] = v; } };
+const ssDel = k => { try { sessionStorage.removeItem(k); } catch { delete mem['s' + k]; } };
+const leer = (get, k, def) => { try { const v = get(k); return v ? JSON.parse(v) : def; } catch { return def; } };
+
+/* ---------- SHA-256 (sin dependencias) ---------- */
+const K256 = [
+0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+
+function sha256(texto) {
+  const datos = new TextEncoder().encode(texto);
+  const largo = datos.length;
+  const total = ((largo + 9 + 63) >> 6) << 6;
+  const buf = new Uint8Array(total);
+  buf.set(datos);
+  buf[largo] = 0x80;
+  const vista = new DataView(buf.buffer);
+  vista.setUint32(total - 8, Math.floor((largo * 8) / 4294967296));
+  vista.setUint32(total - 4, (largo * 8) >>> 0);
+  const H = [0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  const rotr = (x, n) => (x >>> n) | (x << (32 - n));
+  const w = new Uint32Array(64);
+  for (let off = 0; off < total; off += 64) {
+    for (let i = 0; i < 16; i++) w[i] = vista.getUint32(off + i * 4);
+    for (let i = 16; i < 64; i++) {
+      const s0 = rotr(w[i-15], 7) ^ rotr(w[i-15], 18) ^ (w[i-15] >>> 3);
+      const s1 = rotr(w[i-2], 17) ^ rotr(w[i-2], 19) ^ (w[i-2] >>> 10);
+      w[i] = (w[i-16] + s0 + w[i-7] + s1) >>> 0;
+    }
+    let [a, b, c, d, e, f, g, h] = H;
+    for (let i = 0; i < 64; i++) {
+      const S1 = rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25);
+      const ch = (e & f) ^ (~e & g);
+      const t1 = (h + S1 + ch + K256[i] + w[i]) >>> 0;
+      const S0 = rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22);
+      const maj = (a & b) ^ (a & c) ^ (b & c);
+      const t2 = (S0 + maj) >>> 0;
+      h = g; g = f; f = e; e = (d + t1) >>> 0;
+      d = c; c = b; b = a; a = (t1 + t2) >>> 0;
+    }
+    [a, b, c, d, e, f, g, h].forEach((x, j) => { H[j] = (H[j] + x) >>> 0; });
+  }
+  return H.map(x => x.toString(16).padStart(8, '0')).join('');
+}
+
+/* ---------- Datos de usuarios ---------- */
+function nuevaSal() {
+  const a = new Uint8Array(8);
+  if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(a);
+  else for (let i = 0; i < a.length; i++) a[i] = Math.floor(Math.random() * 256);
+  return [...a].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+const hashClave = (clave, sal) => sha256(sal + ':' + clave);
+
+function crearUsuario({ nombre, usuario, rol, clave }) {
+  const sal = nuevaSal();
+  return {
+    id: 'u' + Date.now().toString(36) + Math.floor(Math.random() * 46656).toString(36),
+    nombre, usuario, rol, activo: true, sal,
+    hash: hashClave(clave, sal),
+    creado: new Date().toISOString(),
+    ultimoIngreso: null
+  };
+}
+const guardarUsuarios = us => lsSet(LS_USUARIOS, JSON.stringify(us));
+function sembrar() {
+  const us = [
+    crearUsuario({ nombre: 'Administrador del sistema', usuario: 'admin',   rol: 'admin',      clave: 'Admin123' }),
+    crearUsuario({ nombre: 'Almacenero de prueba',      usuario: 'almacen', rol: 'almacenero', clave: 'Almacen123' })
+  ];
+  guardarUsuarios(us);
+  return us;
+}
+function usuarios() {
+  const v = leer(lsGet, LS_USUARIOS, null);
+  return Array.isArray(v) && v.length ? v : sembrar();
+}
+const adminsActivos = us => us.filter(u => u.rol === 'admin' && u.activo).length;
+
+function validarClave(c) {
+  if (c.length < 8) return 'Usa al menos 8 caracteres.';
+  if (!/[a-z]/i.test(c) || !/\d/.test(c)) return 'Incluye al menos una letra y un número.';
+  return '';
+}
+
+/* ---------- Sesión ---------- */
+const sesion = () => leer(ssGet, SS_SESION, null);
+const cerrarSesion = () => ssDel(SS_SESION);
+function usuarioActual() {
+  const s = sesion();
+  if (!s) return null;
+  const u = usuarios().find(x => x.id === s.id);
+  if (!u || !u.activo) { cerrarSesion(); return null; }
+  return u;
+}
+
+/* ---------- Inicio de sesión (INV-6) ---------- */
+function intentarLogin(usuarioIn, clave) {
+  const key = usuarioIn.trim().toLowerCase();
+  const ahora = Date.now();
+  const bloqueos = leer(lsGet, LS_BLOQUEOS, {});
+  let rec = bloqueos[key] || { fallos: 0, hasta: 0 };
+  if (rec.hasta > ahora) {
+    const s = Math.ceil((rec.hasta - ahora) / 1000);
+    return { ok: false, msg: `Demasiados intentos fallidos. Vuelve a intentarlo en ${s} s.`, bloqueo: rec.hasta };
+  }
+  if (rec.hasta && rec.hasta <= ahora) rec = { fallos: 0, hasta: 0 };
+
+  const us = usuarios();
+  const user = us.find(x => x.usuario.toLowerCase() === key);
+  const valido = !!user && user.hash === hashClave(clave, user.sal);
+
+  if (!valido) {
+    rec.fallos += 1;
+    let msg;
+    let bloqueo = 0;
+    if (rec.fallos >= MAX_FALLOS) {
+      rec = { fallos: 0, hasta: ahora + BLOQUEO_MS };
+      bloqueo = rec.hasta;
+      msg = `Demasiados intentos fallidos. Vuelve a intentarlo en ${BLOQUEO_MS / 1000} s.`;
+    } else {
+      const q = MAX_FALLOS - rec.fallos;
+      msg = `Usuario o contraseña incorrectos. Te ${q === 1 ? 'queda 1 intento' : 'quedan ' + q + ' intentos'}.`;
+    }
+    bloqueos[key] = rec;
+    lsSet(LS_BLOQUEOS, JSON.stringify(bloqueos));
+    return { ok: false, msg, bloqueo };
+  }
+
+  delete bloqueos[key];
+  lsSet(LS_BLOQUEOS, JSON.stringify(bloqueos));
+  if (!user.activo) {
+    return { ok: false, msg: 'Tu usuario está inactivo. Pide a un administrador que lo active.' };
+  }
+  const anterior = user.ultimoIngreso;
+  user.ultimoIngreso = new Date().toISOString();
+  guardarUsuarios(us);
+  ssSet(SS_SESION, JSON.stringify({ id: user.id, anterior }));
+  return { ok: true };
+}
+
+/* ---------- Vistas ---------- */
+
+function vistaLogin() {
+  return `
+  <main class="login">
+    <section class="login-intro">
+      <p class="marca">Inventario</p>
+      <h1>Control de stock para tu almacén</h1>
+      <p>Entra con tu usuario para registrar productos, entradas y salidas, y ver cuánto hay en cada estante.</p>
+      <p class="nota">Prototipo del Sprint 1: acceso (INV-6) y usuarios con roles (INV-7). Los datos se guardan solo en este navegador.</p>
+    </section>
+    <section class="etiqueta" aria-labelledby="t-login">
+      <div class="etiqueta-cab"><h2 id="t-login">Acceso al almacén</h2></div>
+      <form id="f-login" novalidate>
+        <div class="campo">
+          <label for="usuario">Usuario</label>
+          <input id="usuario" name="usuario" autocomplete="username" autocapitalize="none" spellcheck="false" aria-describedby="e-usuario">
+          <p class="error" id="e-usuario" role="alert"></p>
+        </div>
+        <div class="campo">
+          <label for="clave">Contraseña</label>
+          <div class="clave-wrap">
+            <input id="clave" name="clave" type="password" autocomplete="current-password" aria-describedby="e-clave">
+            <button type="button" class="ver" data-action="ver-clave" aria-pressed="false">Mostrar</button>
+          </div>
+          <p class="error" id="e-clave" role="alert"></p>
+        </div>
+        <p class="error" id="e-general" role="alert" style="margin:-4px 0 14px"></p>
+        <button class="btn primario" type="submit">Entrar</button>
+      </form>
+      <details class="demo">
+        <summary>Cuentas de prueba</summary>
+        <div class="demo-cuerpo">
+          <table class="mini"><tbody>
+            <tr><td><code>admin</code></td><td><code>Admin123</code></td><td>Administrador</td>
+                <td><button type="button" class="link" data-action="demo" data-u="admin" data-c="Admin123">Usar</button></td></tr>
+            <tr><td><code>almacen</code></td><td><code>Almacen123</code></td><td>Almacenero</td>
+                <td><button type="button" class="link" data-action="demo" data-u="almacen" data-c="Almacen123">Usar</button></td></tr>
+          </tbody></table>
+          <button type="button" class="link" data-action="reset-demo">Restablecer datos de prueba</button>
+        </div>
+      </details>
+    </section>
+  </main>`;
+}
+
+function vistaShell(user, ruta, contenido) {
+  const item = (id, texto) =>
+    `<a href="#/${id}" ${ruta === id ? 'aria-current="page"' : ''}>${texto}</a>`;
+  const pronto = (t, s) => `<div class="pronto">${t} <span class="tag">${s}</span></div>`;
+  return `
+  <header class="barra">
+    <span class="marca">Inventario</span>
+    <div class="barra-der">
+      <span class="quien"><strong>${esc(user.nombre)}</strong><span class="rol rol-${user.rol}">${ROLES[user.rol]}</span></span>
+      <button type="button" class="btn claro" data-action="salir">Cerrar sesión</button>
+    </div>
+  </header>
+  <div class="cuerpo">
+    <nav class="lateral" aria-label="Secciones del sistema">
+      ${item('inicio', 'Inicio')}
+      ${user.rol === 'admin' ? item('usuarios', 'Usuarios y roles') : ''}
+      <p class="grupo">En camino</p>
+      ${pronto('Productos', 'Sprint 2')}
+      ${pronto('Movimientos', 'Sprint 3')}
+      ${pronto('Alertas y reportes', 'Sprint 3 y 4')}
+    </nav>
+    <main id="contenido">${contenido}</main>
+  </div>`;
+}
+
+function vistaInicio(user) {
+  const ses = sesion() || {};
+  const col = rol => (user.rol === rol ? ' class="mia"' : '');
+  const filas = FUNCIONES.map(x => `
+    <tr>
+      <td>${x.f}</td>
+      <td${col('admin')}><span class="${x.a ? 'si' : 'no'}">${x.a ? 'Sí' : 'No'}</span></td>
+      <td${col('almacenero')}><span class="${x.m ? 'si' : 'no'}">${x.m ? 'Sí' : 'No'}</span></td>
+      <td>${x.s}</td>
+    </tr>`).join('');
+  return `
+    <h1 tabindex="-1">Hola, ${esc(user.nombre)}</h1>
+    <p class="sub">Ingresaste como ${ROLES[user.rol]}. Esta tabla muestra qué puede hacer cada rol; tu rol está resaltado.</p>
+    <div class="tabla-wrap">
+      <table>
+        <caption class="sr">Permisos por rol</caption>
+        <thead><tr>
+          <th scope="col">Función</th>
+          <th scope="col"${user.rol === 'admin' ? ' class="mia"' : ''}>Administrador</th>
+          <th scope="col"${user.rol === 'almacenero' ? ' class="mia"' : ''}>Almacenero</th>
+          <th scope="col">Disponible en</th>
+        </tr></thead>
+        <tbody>${filas}</tbody>
+      </table>
+    </div>
+    <dl class="sesion">
+      <dt>Ingreso actual</dt><dd>${fmt(user.ultimoIngreso)}</dd>
+      <dt>Ingreso anterior</dt><dd>${ses.anterior ? fmt(ses.anterior) : 'Es tu primer ingreso'}</dd>
+    </dl>`;
+}
+
+function vistaRestringido() {
+  return `
+    <div class="vacio">
+      <h1 tabindex="-1">No tienes acceso a esta sección</h1>
+      <p>Usuarios y roles es solo para administradores. Si necesitas un cambio en tu cuenta, pídeselo a un administrador.</p>
+      <a class="btn borde" style="display:inline-flex;align-items:center;text-decoration:none" href="#/inicio">Volver al inicio</a>
+    </div>`;
+}
+
+function vistaUsuarios(yo) {
+  const us = usuarios();
+  const activos = us.filter(u => u.activo).length;
+  const filas = us.map(u => {
+    const propio = u.id === yo.id;
+    const opciones = Object.entries(ROLES).map(([k, v]) =>
+      `<option value="${k}" ${u.rol === k ? 'selected' : ''}>${v}</option>`).join('');
+    return `
+    <tr>
+      <td><strong>${esc(u.nombre)}</strong>${propio ? ' <span class="tu">(tú)</span>' : ''}</td>
+      <td>${esc(u.usuario)}</td>
+      <td>
+        <label class="sr" for="rol-${u.id}">Rol de ${esc(u.nombre)}</label>
+        <select id="rol-${u.id}" class="rol-sel" data-action="cambiar-rol" data-id="${u.id}" ${propio ? 'disabled title="No puedes cambiar tu propio rol"' : ''}>${opciones}</select>
+      </td>
+      <td><span class="estado ${u.activo ? 'on' : 'off'}">${u.activo ? 'Activo' : 'Inactivo'}</span></td>
+      <td>${fmt(u.ultimoIngreso)}</td>
+      <td><div class="acc">
+        <button type="button" class="btn borde chico" data-action="toggle-activo" data-id="${u.id}" ${propio ? 'disabled title="No puedes desactivar tu propio usuario"' : ''}>${u.activo ? 'Desactivar' : 'Activar'}</button>
+        <button type="button" class="btn borde chico" data-action="reset-clave" data-id="${u.id}">Restablecer contraseña</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+
+  const opcionesRol = Object.entries(ROLES).map(([k, v]) =>
+    `<option value="${k}" ${k === 'almacenero' ? 'selected' : ''}>${v}</option>`).join('');
+
+  return `
+    <h1 tabindex="-1">Usuarios y roles</h1>
+    <p class="sub">Crea usuarios y define qué puede hacer cada uno. El rol controla a qué secciones y acciones tiene acceso.</p>
+    <div class="barra-acc">
+      <p class="resumen">${us.length} ${us.length === 1 ? 'usuario' : 'usuarios'}, ${activos} ${activos === 1 ? 'activo' : 'activos'}</p>
+      <button type="button" class="btn primario" style="width:auto" data-action="nuevo-usuario">Nuevo usuario</button>
+    </div>
+    <div class="tabla-wrap">
+      <table>
+        <caption class="sr">Lista de usuarios</caption>
+        <thead><tr>
+          <th scope="col">Nombre</th><th scope="col">Usuario</th><th scope="col">Rol</th>
+          <th scope="col">Estado</th><th scope="col">Último ingreso</th><th scope="col">Acciones</th>
+        </tr></thead>
+        <tbody>${filas}</tbody>
+      </table>
+    </div>
+
+    <dialog id="dlg-nuevo" aria-labelledby="t-nuevo">
+      <div class="dlg-cab"><h2 id="t-nuevo">Nuevo usuario</h2></div>
+      <form id="f-nuevo" class="dlg-cuerpo" novalidate>
+        <div class="campo"><label for="n-nombre">Nombre completo</label>
+          <input id="n-nombre" name="nombre" autocomplete="off" aria-describedby="e-n-nombre">
+          <p class="error" id="e-n-nombre"></p></div>
+        <div class="campo"><label for="n-usuario">Usuario</label>
+          <input id="n-usuario" name="usuario" autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="a-n-usuario e-n-usuario">
+          <p class="ayuda" id="a-n-usuario">De 3 a 20 caracteres: letras, números, punto o guion bajo.</p>
+          <p class="error" id="e-n-usuario"></p></div>
+        <div class="campo"><label for="n-rol">Rol</label>
+          <select id="n-rol" name="rol" aria-describedby="e-n-rol">${opcionesRol}</select>
+          <p class="error" id="e-n-rol"></p></div>
+        <div class="campo"><label for="n-clave">Contraseña</label>
+          <input id="n-clave" name="clave" type="password" autocomplete="new-password" aria-describedby="a-n-clave e-n-clave">
+          <p class="ayuda" id="a-n-clave">Mínimo 8 caracteres, con letras y números.</p>
+          <p class="error" id="e-n-clave"></p></div>
+        <div class="campo"><label for="n-clave2">Repite la contraseña</label>
+          <input id="n-clave2" name="clave2" type="password" autocomplete="new-password" aria-describedby="e-n-clave2">
+          <p class="error" id="e-n-clave2"></p></div>
+        <div class="dlg-pie">
+          <button type="button" class="btn borde" data-action="cerrar-dialogo">Cancelar</button>
+          <button type="submit" class="btn primario">Crear usuario</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="dlg-clave" aria-labelledby="t-clave">
+      <div class="dlg-cab"><h2 id="t-clave">Restablecer contraseña</h2></div>
+      <form id="f-clave" class="dlg-cuerpo" novalidate>
+        <p id="clave-quien" style="margin-bottom:16px"></p>
+        <div class="campo"><label for="c-clave">Contraseña nueva</label>
+          <input id="c-clave" name="clave" type="password" autocomplete="new-password" aria-describedby="a-c-clave e-c-clave">
+          <p class="ayuda" id="a-c-clave">Mínimo 8 caracteres, con letras y números.</p>
+          <p class="error" id="e-c-clave"></p></div>
+        <div class="dlg-pie">
+          <button type="button" class="btn borde" data-action="cerrar-dialogo">Cancelar</button>
+          <button type="submit" class="btn primario">Guardar contraseña</button>
+        </div>
+      </form>
+    </dialog>`;
+}
+
+/* ---------- Render y rutas ---------- */
+const app = $('#app');
+let avisoTimer = 0, bloqueoTimer = 0;
+
+function avisar(msg, tipo = 'ok') {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.className = 'toast visible' + (tipo === 'err' ? ' err' : '');
+  clearTimeout(avisoTimer);
+  avisoTimer = setTimeout(() => { t.className = 'toast'; }, 4500);
+}
+
+let vistaActual = '';
+
+/* soloSiCambia: al cambiar la ruta (#) solo se vuelve a dibujar si cambió la vista,
+   así no se borra lo que la persona está escribiendo en el formulario. */
+function render(foco, soloSiCambia) {
+  const user = usuarioActual();
+  const pedida = (location.hash.replace(/^#\/?/, '') || 'inicio');
+  const ruta = ['inicio', 'usuarios'].includes(pedida) ? pedida : 'inicio';
+  const clave = user ? user.id + '|' + ruta + '|' + user.rol : 'login';
+  if (soloSiCambia && clave === vistaActual) return;
+  vistaActual = clave;
+  clearTimeout(bloqueoTimer);
+  if (!user) {
+    app.innerHTML = vistaLogin();
+    document.title = 'Acceso | Inventario';
+    if (foco) $('#usuario').focus();
+    return;
+  }
+  let contenido, titulo;
+  if (ruta === 'usuarios') {
+    if (user.rol !== 'admin') { contenido = vistaRestringido(); titulo = 'Acceso restringido'; }
+    else { contenido = vistaUsuarios(user); titulo = 'Usuarios y roles'; }
+  } else { contenido = vistaInicio(user); titulo = 'Inicio'; }
+  app.innerHTML = vistaShell(user, ruta, contenido);
+  document.title = titulo + ' | Inventario';
+  if (foco) { const h = $('#contenido h1'); if (h) h.focus(); }
+}
+
+/* ---------- Acciones de administración (INV-7) ---------- */
+const esAdmin = u => !!u && u.rol === 'admin';
+
+function cambiarRol(id, rol) {
+  const yo = usuarioActual();
+  if (!esAdmin(yo)) { avisar('Solo un administrador puede cambiar roles.', 'err'); return render(false); }
+  const us = usuarios();
+  const u = us.find(x => x.id === id);
+  if (!u || !ROLES[rol]) return render(false);
+  if (u.id === yo.id) { avisar('No puedes cambiar tu propio rol.', 'err'); return render(false); }
+  if (u.rol === 'admin' && rol !== 'admin' && u.activo && adminsActivos(us) <= 1) {
+    avisar('Debe quedar al menos un administrador activo.', 'err'); return render(false);
+  }
+  u.rol = rol;
+  guardarUsuarios(us);
+  render(false);
+  avisar(`Rol de ${u.nombre} cambiado a ${ROLES[rol]}.`);
+}
+
+function alternarActivo(id) {
+  const yo = usuarioActual();
+  if (!esAdmin(yo)) { avisar('Solo un administrador puede activar o desactivar usuarios.', 'err'); return render(false); }
+  const us = usuarios();
+  const u = us.find(x => x.id === id);
+  if (!u) return render(false);
+  if (u.id === yo.id) { avisar('No puedes desactivar tu propio usuario.', 'err'); return render(false); }
+  if (u.activo && u.rol === 'admin' && adminsActivos(us) <= 1) {
+    avisar('Debe quedar al menos un administrador activo.', 'err'); return render(false);
+  }
+  u.activo = !u.activo;
+  guardarUsuarios(us);
+  render(false);
+  avisar(`${u.nombre} ahora está ${u.activo ? 'activo' : 'inactivo'}.`);
+}
+
+function ponerError(idCampo, idError, msg) {
+  const e = $('#' + idError), c = $('#' + idCampo);
+  e.textContent = msg;
+  if (c) { if (msg) c.setAttribute('aria-invalid', 'true'); else c.removeAttribute('aria-invalid'); }
+}
+
+function abrirDialogo(id) {
+  const d = $('#' + id);
+  d.querySelectorAll('form').forEach(f => f.reset());
+  d.querySelectorAll('.error').forEach(e => { e.textContent = ''; });
+  d.querySelectorAll('[aria-invalid]').forEach(c => c.removeAttribute('aria-invalid'));
+  d.showModal();
+  const primero = d.querySelector('input'); if (primero) primero.focus();
+  return d;
+}
+
+function enviarNuevo(f) {
+  const yo = usuarioActual();
+  if (!esAdmin(yo)) { avisar('Solo un administrador puede crear usuarios.', 'err'); return; }
+  const v = n => f.elements[n].value;
+  const nombre = v('nombre').trim(), usuario = v('usuario').trim(), rol = v('rol'), clave = v('clave'), clave2 = v('clave2');
+  const us = usuarios();
+  const err = {};
+  if (nombre.length < 3) err.nombre = 'Escribe el nombre completo (mínimo 3 letras).';
+  else if (nombre.length > 60) err.nombre = 'Usa 60 caracteres como máximo.';
+  if (!RE_USUARIO.test(usuario)) err.usuario = 'Usa de 3 a 20 caracteres: letras, números, punto o guion bajo.';
+  else if (us.some(u => u.usuario.toLowerCase() === usuario.toLowerCase())) err.usuario = 'Ese usuario ya existe. Elige otro.';
+  if (!ROLES[rol]) err.rol = 'Elige un rol.';
+  const ec = validarClave(clave);
+  if (ec) err.clave = ec;
+  if (!err.clave && clave !== clave2) err.clave2 = 'Las contraseñas no coinciden.';
+  const campos = ['nombre', 'usuario', 'rol', 'clave', 'clave2'];
+  campos.forEach(c => ponerError('n-' + c, 'e-n-' + c, err[c] || ''));
+  const primero = campos.find(c => err[c]);
+  if (primero) { $('#n-' + primero).focus(); return; }
+  us.push(crearUsuario({ nombre, usuario, rol, clave }));
+  guardarUsuarios(us);
+  $('#dlg-nuevo').close();
+  render(false);
+  avisar(`Usuario ${usuario} creado como ${ROLES[rol]}.`);
+}
+
+function abrirReset(id) {
+  const u = usuarios().find(x => x.id === id);
+  if (!u) return;
+  const d = abrirDialogo('dlg-clave');
+  d.querySelector('form').dataset.id = id;
+  $('#clave-quien').textContent = `Nueva contraseña para ${u.nombre} (${u.usuario}).`;
+}
+
+function enviarReset(f) {
+  const yo = usuarioActual();
+  if (!esAdmin(yo)) { avisar('Solo un administrador puede restablecer contraseñas.', 'err'); return; }
+  const us = usuarios();
+  const u = us.find(x => x.id === f.dataset.id);
+  if (!u) return;
+  const clave = f.elements['clave'].value;
+  const msg = validarClave(clave);
+  ponerError('c-clave', 'e-c-clave', msg);
+  if (msg) { $('#c-clave').focus(); return; }
+  u.sal = nuevaSal();
+  u.hash = hashClave(clave, u.sal);
+  guardarUsuarios(us);
+  $('#dlg-clave').close();
+  render(false);
+  avisar(`Contraseña de ${u.nombre} actualizada.`);
+}
+
+/* ---------- Eventos ---------- */
+function enviarLogin(f) {
+  ['usuario', 'clave'].forEach(c => ponerError(c, 'e-' + c, ''));
+  $('#e-general').textContent = '';
+  const u = f.elements['usuario'].value, c = f.elements['clave'].value;
+  let falta = '';
+  if (!u.trim()) { ponerError('usuario', 'e-usuario', 'Escribe tu usuario.'); falta = 'usuario'; }
+  if (!c) { ponerError('clave', 'e-clave', 'Escribe tu contraseña.'); falta = falta || 'clave'; }
+  if (falta) { $('#' + falta).focus(); return; }
+  const r = intentarLogin(u, c);
+  if (!r.ok) {
+    $('#e-general').textContent = r.msg;
+    f.elements['clave'].value = '';
+    f.elements['clave'].focus();
+    clearTimeout(bloqueoTimer);
+    if (r.bloqueo) {
+      bloqueoTimer = setTimeout(() => {
+        const g = $('#e-general'); if (g) g.textContent = 'Ya puedes intentarlo de nuevo.';
+      }, Math.max(0, r.bloqueo - Date.now()) + 50);
+    }
+    return;
+  }
+  location.hash = '#/inicio';
+  render(true);
+}
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-action]');
+  if (!b) return;
+  switch (b.dataset.action) {
+    case 'ver-clave': {
+      const i = $('#clave'); const ver = i.type === 'password';
+      i.type = ver ? 'text' : 'password';
+      b.textContent = ver ? 'Ocultar' : 'Mostrar';
+      b.setAttribute('aria-pressed', String(ver));
+      break;
+    }
+    case 'demo':
+      $('#usuario').value = b.dataset.u; $('#clave').value = b.dataset.c; $('#clave').focus();
+      break;
+    case 'reset-demo':
+      if (confirm('Se borrarán los usuarios creados y volverán las cuentas de prueba. ¿Continuar?')) {
+        lsSet(LS_BLOQUEOS, '{}'); sembrar(); avisar('Datos de prueba restablecidos.');
+      }
+      break;
+    case 'salir': cerrarSesion(); location.hash = ''; render(true); break;
+    case 'nuevo-usuario': abrirDialogo('dlg-nuevo'); break;
+    case 'cerrar-dialogo': b.closest('dialog').close(); break;
+    case 'toggle-activo': alternarActivo(b.dataset.id); break;
+    case 'reset-clave': abrirReset(b.dataset.id); break;
+  }
+});
+
+document.addEventListener('change', e => {
+  const s = e.target.closest('select[data-action="cambiar-rol"]');
+  if (s) cambiarRol(s.dataset.id, s.value);
+});
+
+document.addEventListener('submit', e => {
+  const f = e.target;
+  if (f.id === 'f-login') { e.preventDefault(); enviarLogin(f); }
+  else if (f.id === 'f-nuevo') { e.preventDefault(); enviarNuevo(f); }
+  else if (f.id === 'f-clave') { e.preventDefault(); enviarReset(f); }
+});
+
+window.addEventListener('hashchange', () => render(true, true));
+render(true);
+})();
+</script>
+</body>
+</html>
